@@ -80,7 +80,7 @@ please open an issue.
 
 ## Install
 
-1. Download this repository (on GitHub: **Code > Download ZIP**) and unzip it.
+1. Download [this repository](https://github.com/cvandal/lore) (**Code > Download ZIP**) and unzip it.
 2. Copy the `src` folder into your WoW Forever AddOns folder and rename it to `Lore`:
 
    ```
