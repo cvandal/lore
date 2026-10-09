@@ -80,11 +80,13 @@ please open an issue.
 
 ## Install
 
-1. Download [this repository](https://github.com/cvandal/lore) (**Code > Download ZIP**) and unzip it.
-2. Copy the `src` folder into your WoW Forever AddOns folder and rename it to `Lore`:
+1. Download `Lore-x.y.z.zip` from the
+   [latest release](https://github.com/cvandal/lore/releases/latest). Not "Source code":
+   that's the whole project, not the addon.
+2. Unzip it into your WoW Forever AddOns folder, so you end up with:
 
    ```
-   World of Warcraft/_classic_beta_/Interface/AddOns/Lore
+   World of Warcraft/_classic_beta_/Interface/AddOns/Lore/Lore.toc
    ```
 
 3. Start the game, or restart it if it's running, and make sure **Lore** is ticked in the

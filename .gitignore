@@ -4,3 +4,4 @@ tools/build/
 tools/.lua51/
 __pycache__/
 .DS_Store
+dist/
