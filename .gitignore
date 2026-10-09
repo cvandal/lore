@@ -1,0 +1,6 @@
+# Build inputs and outputs: tools/build.sh downloads and regenerates these.
+tools/vendor/
+tools/build/
+tools/.lua51/
+__pycache__/
+.DS_Store
