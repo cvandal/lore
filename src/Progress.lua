@@ -2,16 +2,21 @@ local _, Lore = ...
 
 -- Story lookup tables ----------------------------------------------------------
 
+Lore.stories = {}         -- the player's faction's, set by LoadStories at login
 Lore.storiesById = {}
 Lore.questToStory = {}    -- [questID] = story
 Lore.questToChapter = {}  -- [questID] = chapter index within that story
 
-for _, story in ipairs(Lore.stories) do
-    Lore.storiesById[story.id] = story
-    for index, quest in ipairs(story.quests) do
-        for _, questID in ipairs(quest.ids) do
-            Lore.questToStory[questID] = story
-            Lore.questToChapter[questID] = index
+function Lore:LoadStories(faction)
+    self.stories = self.storyData[faction]
+    self.acts = self.actsByFaction[faction]
+    for _, story in ipairs(self.stories) do
+        self.storiesById[story.id] = story
+        for index, quest in ipairs(story.quests) do
+            for _, questID in ipairs(quest.ids) do
+                self.questToStory[questID] = story
+                self.questToChapter[questID] = index
+            end
         end
     end
 end

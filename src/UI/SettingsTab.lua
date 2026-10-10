@@ -16,18 +16,18 @@ UI.RegisterTab({
         L:Text("Saved for this character.", { size = 11, color = "faded", justify = "CENTER", gap = 8 })
         L:Divider()
 
-        L:Text("Options", { font = "title", size = 14, color = "crimson", gap = 8 })
+        L:Text("Options", { font = "title", size = 14, color = "accent", gap = 8 })
         for _, option in ipairs(Lore.options) do
             L:Check(option.label, option.description, option.get(), function(on)
                 Lore:SetOption(option, on)
             end)
         end
 
-        L:Text("Tools", { font = "title", size = 14, color = "crimson", gap = 8 })
+        L:Text("Tools", { font = "title", size = 14, color = "accent", gap = 8 })
         L:Button("Reset window position", 170, 0, function() SlashCmdList.LORE("reset") end)
         L:Space(8)
 
-        L:Text("Slash commands", { font = "title", size = 14, color = "crimson", gap = 4 })
+        L:Text("Slash commands", { font = "title", size = 14, color = "accent", gap = 4 })
         L:Text("Type these in chat. Each option above has one too.", { size = 12, color = "faded", gap = 8 })
         for _, command in ipairs(Lore.commands) do
             local top = L.y

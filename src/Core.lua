@@ -2,6 +2,7 @@ local ADDON_NAME, Lore = ...
 _G.Lore = Lore
 
 Lore.version = "0.1.0"
+Lore.storyData = {}  -- [faction] = stories, filled by Data/<Faction>Stories.lua
 
 local defaults = {
     journal = {},   -- [storyId] = { completedAt, level, zone } or { preLore = true }
@@ -57,11 +58,14 @@ function Lore:ADDON_LOADED(name)
 end
 
 function Lore:PLAYER_LOGIN()
-    self.isHorde = UnitFactionGroup("player") == "Horde"
-    if not self.isHorde then
-        self:Print("Lore only supports Horde characters.")
+    local faction = UnitFactionGroup("player")
+    if not self.storyData[faction] then
+        self:Print("Lore only supports Horde and Alliance characters.")
         return
     end
+    self.faction = faction
+    self.Theme.Apply(faction)
+    self:LoadStories(faction)
     self:BuildMyStories()
     self.UI.CreateMinimapButton()
     -- Give the client a moment to load quest completion flags.
@@ -77,13 +81,13 @@ end
 
 -- Classic clients pass (questLogIndex, questID); WoW Forever passes just the questID.
 function Lore:QUEST_ACCEPTED(first, second)
-    if not self.isHorde then return end
+    if not self.faction then return end
     self:OnQuestAccepted(second or first)
     self:RequestRefresh()
 end
 
 function Lore:QUEST_TURNED_IN(questID)
-    if not self.isHorde then return end
+    if not self.faction then return end
     self:OnQuestTurnedIn(questID)
     self:RequestRefresh()
 end
@@ -91,7 +95,7 @@ end
 -- Coalesce bursts of quest log events into a single redraw of the book and the pins.
 local refreshPending = false
 function Lore:RequestRefresh()
-    if refreshPending or not self.isHorde then return end
+    if refreshPending or not self.faction then return end
     refreshPending = true
     C_Timer.After(0.2, function()
         refreshPending = false
@@ -103,8 +107,8 @@ end
 -- Slash commands -------------------------------------------------------------
 
 function Lore:Toggle()
-    if not self.isHorde then
-        self:Print("Lore only supports Horde characters.")
+    if not self.faction then
+        self:Print("Lore only supports Horde and Alliance characters.")
         return
     end
     self.UI.Toggle()

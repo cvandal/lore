@@ -140,7 +140,7 @@ end
 
 -- Open the book on a given tab (e.g. /lore settings).
 function UI.ShowTab(key)
-    if not Lore.isHorde then return Lore:Toggle() end  -- explains why not
+    if not Lore.faction then return Lore:Toggle() end  -- explains why not
     if not UI.frame then
         UI.frame = CreateMainFrame()
         UI.ResetPosition()

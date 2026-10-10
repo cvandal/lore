@@ -1,8 +1,13 @@
 # Lore
 
-A World of Warcraft addon for Horde players that guides you through the story quests of
-vanilla WoW. Skip the "kill 10 boars" filler and follow the tales that matter: the rise of
-the Burning Blade, Sylvanas's plague, the road to Onyxia's lair.
+<p align="center">
+  <img src="assets/branding/logo.png" alt="Lore" width="512" height="512">
+</p>
+
+A World of Warcraft addon for Horde and Alliance players that guides you through the story
+quests of vanilla WoW. Skip the "kill 10 boars" filler and follow the tales that matter: the
+rise of the Burning Blade, Sylvanas's plague, the Defias Brotherhood, the road to Onyxia's
+lair.
 
 Lore runs on the **WoW Forever** client and covers vanilla (Classic Era) content only.
 
@@ -13,7 +18,8 @@ Lore runs on the **WoW Forever** client and covers vanilla (Classic Era) content
 
 ## What it does
 
-Lore is a leather-bound book with four bookmarks:
+Lore is a leather-bound book with four bookmarks, bound in your faction's colours: red on
+brown leather for the Horde, blue on navy for the Alliance.
 
 - **Current Tale** follows the story you're on, picked up from your quest log. Every
   chapter is listed in order, with Blizzard's quest text, the objective, who gives it and a
@@ -26,33 +32,35 @@ Lore is a leather-bound book with four bookmarks:
 
 Around the game world it also:
 
-- pins where your tale's next chapter starts on the world map and minimap. It never pins
+- Pins where your tale's next chapter starts on the world map and minimap. It never pins
   what the game already marks.
-- puts a small Lore badge on story quests in an NPC's quest list, and a tag beside the quest
+- Puts a small Lore badge on story quests in an NPC's quest list, and a tag beside the quest
   window naming the tale and chapter.
-- adds the tale and chapter to a story quest's tooltip in the quest log.
-- says in chat when a tale begins, moves on or ends.
+- Adds the tale and chapter to a story quest's tooltip in the quest log.
+- Says in chat when a tale begins, moves on or ends.
 
 ## How story quests are chosen
 
 Nobody picks the stories by hand. A build script reads the full quest database and decides,
-using the same rules for every quest. It runs in five steps.
+using the same rules for every quest. It runs in five steps, once for each faction, so the
+Horde and the Alliance each get their own tales.
 
-**1. Drop what can't be story.** Quests the Horde can't do, quests that aren't really in the
-game, repeatable quests, and profession, holiday, battleground and reputation-grind quests.
+**1. Drop what can't be story.** Quests your faction can't do, quests that aren't really in
+the game, repeatable quests, and profession, holiday, battleground and reputation-grind
+quests.
 
 **2. Score every quest** for how much story it carries:
 
-| Signal                                                           | Points    |
-| ---------------------------------------------------------------- | --------- |
-| Given or received by a lore figure (Thrall, Cairne, Sylvanas...) | +3        |
-| Kill a named enemy rather than a crowd                           | +2        |
-| Leads into a raid / a dungeon                                    | +2 / +1.5 |
-| Lore terms in the text (Scourge, Burning Legion, dragonflight)   | up to +2  |
-| Loot from a named enemy                                          | +1        |
-| Long quest text, or a pure errand that moves the plot along      | +0.5      |
-| "Kill or collect 5 or more" of something ordinary                | -2.5      |
-| Gather 3 or more different items                                 | -1.5      |
+| Signal                                                          | Points    |
+| --------------------------------------------------------------- | --------- |
+| Given or received by a lore figure (Thrall, Bolvar, Tyrande...) | +3        |
+| Kill a named enemy rather than a crowd                          | +2        |
+| Leads into a raid / a dungeon                                   | +2 / +1.5 |
+| Lore terms in the text (Scourge, Burning Legion, dragonflight)  | up to +2  |
+| Loot from a named enemy                                         | +1        |
+| Long quest text, or a pure errand that moves the plot along     | +0.5      |
+| "Kill or collect 5 or more" of something ordinary               | -2.5      |
+| Gather 3 or more different items                                | -1.5      |
 
 **3. Link quests into chains** using the game's own requirements (which quest unlocks
 which). In each group of linked quests, the highest-scoring route becomes a story. Side
@@ -70,9 +78,10 @@ of its chapters is added to it, even filler, so you're never sent to a quest you
 up. If another tale already tells that quest, the chapter says which tale to finish first.
 A tale is only offered to races and classes that can do every one of its chapters.
 
-The result is 110 tales: 50 in the open world, 29 leading into dungeons, 6 into raids and
-25 class quests. Each takes its name from one of its quests, and a few names were adjusted
-where the rule picked an errand instead of the story.
+The result is 110 Horde tales (50 in the open world, 29 leading into dungeons, 6 into raids
+and 25 class quests) and 116 Alliance tales (55, 29, 5 and 27). Each takes its name from one
+of its quests, and a few names were adjusted where the rule picked an errand instead of the
+story.
 
 The rules can't read. A dull quest with dramatic wording can score well, and a quiet but
 important one can be missed. If a tale is missing, shouldn't be there, or has a poor name,
@@ -91,7 +100,8 @@ please open an issue.
 
 3. Start the game, or restart it if it's running, and make sure **Lore** is ticked in the
    AddOns list on the character screen.
-4. Log in with a Horde character and type `/lore`, or click the note icon on the minimap.
+4. Log in with a Horde or Alliance character and type `/lore`, or click the note icon on
+   the minimap.
 
 ## Commands
 

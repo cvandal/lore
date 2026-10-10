@@ -1,6 +1,6 @@
 ## Interface: 16001
 ## Title: Lore
-## Notes: Guides Horde players to the story quests of vanilla World of Warcraft.
+## Notes: Guides Horde and Alliance players to the story quests of vanilla World of Warcraft.
 ## Author: Chris van Dal
 ## Version: 0.1.0
 ## IconTexture: Interface\Icons\INV_Misc_Note_01
@@ -14,7 +14,8 @@ Libs\HereBeDragons\HereBeDragons-Pins-2.0.lua
 
 Core.lua
 Data\Acts.lua
-Data\Stories.lua
+Data\HordeStories.lua
+Data\AllianceStories.lua
 Progress.lua
 UI\Theme.lua
 UI\Widgets.lua

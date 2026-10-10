@@ -170,7 +170,7 @@ end
 function Lore:RefreshPins()
     ReleaseAll()
     wipe(pinned)
-    if not (self.db and self.db.settings.pins and self.isHorde) then return end
+    if not (self.db and self.db.settings.pins and self.faction) then return end
     AutomaticPins(self)
 
     -- The chapter the player asked to see, unless it's now in the log (the game marks it).

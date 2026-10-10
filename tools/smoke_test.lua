@@ -80,16 +80,21 @@ LibStub = function() return fakePins end
 WorldMapFrame = Obj()
 WorldMapFrame.SetMapID = function(_, id) WorldMapFrame._map = id end
 
-local ns = {}
 local root = (arg[0]:match("^(.*)/[^/]*$") or ".") .. "/../src/"
-for line in io.lines(root .. "Lore.toc") do
-    if line:match("%.lua$") and not line:match("^Libs") then
-        assert(loadfile(root .. line:gsub("\\", "/")))("Lore", ns)
+local function LoadAddon()
+    local addon = {}
+    for line in io.lines(root .. "Lore.toc") do
+        if line:match("%.lua$") and not line:match("^Libs") then
+            assert(loadfile(root .. line:gsub("\\", "/")))("Lore", addon)
+        end
     end
+    return addon
 end
+local ns = LoadAddon()
 
 ns:ADDON_LOADED("Lore")
 ns:PLAYER_LOGIN()
+assert(ns.faction == "Horde" and ns.Theme.accentName == "Red", "a Horde character gets the Horde book")
 print(("stories: %d total, %d for an orc warrior"):format(#ns.stories, #ns.myStories))
 
 -- Build checks: required side quests are chapters, and eligibility covers every chapter.
@@ -357,4 +362,53 @@ assert(not ns.db.settings.badges and ns.UI.MarkQuestLog() == 0, "/lore badges tu
 SlashCmdList.LORE("badges")
 assert(ns.UI.MarkQuestLog() == 1, "and back on")
 SlashCmdList.LORE("debug")
+
+-- Alliance: a human paladin gets the Alliance tales, acts and blue book.
+LoreCharDB, LoreFrame, LoreMinimapButton, LOG = nil, nil, nil, {}
+UnitFactionGroup = function() return "Alliance" end
+UnitRace = function() return "Human", "Human", 1 end
+UnitClass = function() return "Paladin", "PALADIN", 2 end
+GetRealZoneText = function() return "Elwynn Forest" end
+ns = LoadAddon()
+ns:ADDON_LOADED("Lore")
+ns:PLAYER_LOGIN()
+print(("alliance stories: %d total, %d for a human paladin"):format(#ns.stories, #ns.myStories))
+assert(ns.faction == "Alliance" and ns.stories == ns.storyData.Alliance)
+assert(ns.storiesById.q373 and ns.storiesById.q373.name == "The Unsent Letter", "the Defias plot is an Alliance tale")
+assert(not ns.storiesById.q752, "no Horde tales (Rites of the Earthmother)")
+assert(ns.acts[1].name == "Act I - Light and Valor", "Act I is the Alliance's")
+assert(ns.Theme.colors.accent == ns.Theme.factions.Alliance.colors.accent, "the accent is Alliance blue")
+assert(ns.Theme.textures.crest:find("Alliance"), "the crest is the Alliance's")
+local tome
+for _, s in ipairs(ns.myStories) do
+    if s.name == "The Tome of Divinity" then tome = s end
+    local paladin = not s.classes
+    for _, c in ipairs(s.classes or {}) do paladin = paladin or c == 2 end
+    assert(paladin, s.name .. " is open to paladins")
+end
+assert(tome, "a paladin gets their class tale")
+-- Class quests list trainers of both factions; Alliance mages go to Bink in Ironforge.
+assert(ns.questToStory[1947].quests[1].giver == "Bink", "class quests start at the faction's own trainer")
+SlashCmdList.LORE("")
+for _, key in ipairs({ "current", "browse", "journal", "settings" }) do
+    ns.UI.SelectTab(key)
+    print(("%-8s regions=%d"):format(key, Count()))
+end
+ns.UI.SelectTab("browse")
+local title, key
+for _, fs in ipairs(ns.UI.textPool.used) do
+    if fs._text == "The Chronicle of the Alliance" then title = true end
+    if (fs._text or ""):match("^Blue tales fit your level") then key = true end
+end
+assert(title and key, "the Chronicle names the Alliance and its blue tales")
+
+-- A character of neither faction is told Lore doesn't support them, and nothing loads.
+LoreCharDB, LoreFrame, LoreMinimapButton = nil, nil, nil
+UnitFactionGroup = function() return nil end
+ns = LoadAddon()
+ns:ADDON_LOADED("Lore")
+ns:PLAYER_LOGIN()
+assert(ns.faction == nil and #ns.stories == 0 and not LoreMinimapButton, "nothing loads without a faction")
+SlashCmdList.LORE("")
+assert(not LoreFrame, "the book doesn't open")
 print("SMOKE OK")

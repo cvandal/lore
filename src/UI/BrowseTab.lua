@@ -32,7 +32,7 @@ local function StoryRow(L, story)
     end
 
     local name = UI.RowText(row, story.name, { x = ICON_W, width = L.width - ICON_W - LEVEL_W - 8, wrap = false,
-        size = 13, color = (done and "faded") or (fits and "crimson") or "ink" })
+        size = 13, color = (done and "faded") or (fits and "accent") or "ink" })
 
     -- Dotted-leader stand-in: a hairline from the end of the name to the level.
     local nameEnd = ICON_W + math.min(name:GetStringWidth(), name:GetWidth()) + 4
@@ -117,7 +117,7 @@ end
 
 local function RenderPreview(L, story)
     local back = L:Row(18, 6)
-    UI.RowText(back, "< Back to the Chronicle", { size = 12, color = "crimson", wrap = false })
+    UI.RowText(back, "< Back to the Chronicle", { size = 12, color = "accent", wrap = false })
     back:SetScript("OnClick", BackToList)
 
     local progress = Lore:GetStoryProgress(story)
@@ -125,7 +125,7 @@ local function RenderPreview(L, story)
     local kind = IMPORTANCE[story.importance]
     if KIND[story.kind] then kind = kind .. " - " .. KIND[story.kind]:lower() end
 
-    L:Text(kind, { font = "title", size = 13, color = "crimson", justify = "CENTER", gap = 2 })
+    L:Text(kind, { font = "title", size = 13, color = "accent", justify = "CENTER", gap = 2 })
     L:Text(story.name, { font = "title", size = 20, justify = "CENTER", gap = 2 })
     L:Text(("%s - levels %d-%d"):format(story.zone, story.minLevel, story.maxLevel),
         { size = 11, color = "faded", justify = "CENTER", gap = 6 })
@@ -155,7 +155,7 @@ UI.RegisterTab({
             return
         end
 
-        L:Text("The Chronicle of the Horde", { font = "title", size = 20, justify = "CENTER", gap = 2 })
+        L:Text("The Chronicle of the " .. Lore.faction, { font = "title", size = 20, justify = "CENTER", gap = 2 })
         L:Text(("Level %d - %s"):format(Lore:PlayerLevel(), GetRealZoneText()),
             { size = 11, color = "faded", justify = "CENTER", gap = 8 })
         L:Divider()
@@ -163,7 +163,7 @@ UI.RegisterTab({
         for _, act in ipairs(Lore.acts) do
             local stories = SortedStoriesFor(act)
             if #stories > 0 then
-                L:Text(act.name, { font = "title", size = 19, color = "crimson", gap = 4 })
+                L:Text(act.name, { font = "title", size = 19, color = "accent", gap = 4 })
                 L:Divider(6)
                 for _, story in ipairs(stories) do
                     StoryRow(L, story)
@@ -172,7 +172,7 @@ UI.RegisterTab({
             end
         end
 
-        L:Text("Red tales fit your level. Diamonds mark major tales. Click a tale to read it.",
+        L:Text(Theme.accentName .. " tales fit your level. Diamonds mark major tales. Click a tale to read it.",
             { size = 11, color = "faded", justify = "CENTER" })
     end,
 })

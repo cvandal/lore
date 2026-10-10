@@ -1,5 +1,5 @@
 #!/bin/sh
-# Rebuilds src/Data/Stories.lua from the latest Questie, QuestieDB and pfQuest data.
+# Rebuilds src/Data/<Faction>Stories.lua from the latest Questie, QuestieDB and pfQuest data.
 #   tools/build.sh            update the sources, export, build
 #   tools/build.sh --report   also print every story's per-quest scoring
 set -e

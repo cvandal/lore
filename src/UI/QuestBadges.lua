@@ -281,7 +281,7 @@ end
 
 function UI.MarkQuestLog()
     count = 0
-    if not (Lore.db and Lore.isHorde) then return count end  -- Blizzard can redraw before login
+    if not (Lore.db and Lore.faction) then return count end  -- Blizzard can redraw before login
     QuestLogTitles(function(button, questID)
         local story, index = Lore:GetChapter(questID)
         SetTooltip(button, story, index)
@@ -317,7 +317,7 @@ events:SetScript("OnEvent", function(_, event)
         HookQuestLog()
         return
     end
-    if not Lore.isHorde then return end
+    if not Lore.faction then return end
     if event == "GOSSIP_SHOW" then
         Later(UI.MarkGossip)
     elseif event == "QUEST_GREETING" then
@@ -351,7 +351,7 @@ function UI.DebugBadges()
         Out(("  %s [%s] %s -> %s"):format(active and "active" or "available", tostring(questID),
             tostring(title), story and (story.name .. ", " .. ChapterLine(story, index)) or "not a story quest"))
     end
-    Out("NPC: " .. tostring(UnitName("npc")) .. ", isHorde: " .. tostring(Lore.isHorde))
+    Out("NPC: " .. tostring(UnitName("npc")) .. ", faction: " .. tostring(Lore.faction))
 
     local panel = GossipFrame and GossipFrame:IsShown() and GossipFrame.GreetingPanel
     Out("Gossip window: " .. (panel and "open" or "closed")

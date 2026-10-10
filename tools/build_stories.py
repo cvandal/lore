@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Builds src/Data/Stories.lua from QuestieDB (vanilla / Classic Era) + pfQuest quest text.
+"""Builds src/Data/<Faction>Stories.lua from QuestieDB (vanilla / Classic Era) + pfQuest quest text.
 
-Pipeline:
-  1. Keep quests a Horde character can do (drop blacklisted, repeatable, event,
+The pipeline runs once per faction:
+  1. Keep quests a character of that faction can do (drop blacklisted, repeatable, event,
      profession and other non-story quests).
   2. Link quests into a directed graph using their prerequisites.
   3. Score every quest for how story-relevant it is.
@@ -23,13 +23,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 BUILD = ROOT / "build"
 VENDOR = ROOT / "vendor"
-OUT = ROOT.parent / "src" / "Data" / "Stories.lua"
+DATA = ROOT.parent / "src" / "Data"
 
 # --- Static knowledge ---------------------------------------------------------------
 
-HORDE_RACES = 2 | 16 | 32 | 128  # Orc, Undead, Tauren, Troll
-HORDE_CLASSES = 1 | 4 | 8 | 16 | 64 | 128 | 256 | 1024  # every class but Paladin
-ALLIANCE_ONLY_CLASSES = 2  # Paladin
+# races and classes: bitmasks of what the faction can play. enemy_classes: the other faction's
+# own class, so quests only it can take are dropped. enemy_npc: QuestieDB's faction letter for
+# the other side's NPCs, whose quests this faction can't take.
+FACTIONS = {
+    "Horde": {
+        "races": 2 | 16 | 32 | 128,                              # Orc, Undead, Tauren, Troll
+        "classes": 1 | 4 | 8 | 16 | 64 | 128 | 256 | 1024,      # every class but Paladin
+        "enemy_classes": 2,                                      # Paladin
+        "enemy_npc": "A",
+    },
+    "Alliance": {
+        "races": 1 | 4 | 8 | 64,                                 # Human, Dwarf, Night Elf, Gnome
+        "classes": 1 | 2 | 4 | 8 | 16 | 128 | 256 | 1024,       # every class but Shaman
+        "enemy_classes": 64,                                     # Shaman
+        "enemy_npc": "H",
+    },
+}
 
 # QuestSort categories (negative zoneOrSort) that are never story content.
 EXCLUDED_SORTS = {
@@ -37,12 +51,8 @@ EXCLUDED_SORTS = {
     -22, -41, -364, -366, -369, -370, -1002, -1003,          # seasonal and holiday events
     -25, -241, -367, -221,                                   # battlegrounds, tournament, reputation grinds, treasure maps
 }
-CLASS_SORTS = {-61: "Warlock", -81: "Warrior", -82: "Shaman", -161: "Mage", -162: "Rogue",
-               -261: "Hunter", -262: "Priest", -263: "Druid"}
-CLASS_BITS = {1: "Warrior", 4: "Hunter", 8: "Rogue", 16: "Priest", 64: "Shaman",
-              128: "Mage", 256: "Warlock", 1024: "Druid"}
 
-# Figures whose involvement marks a quest as part of the Horde's (or the world's) story.
+# Figures whose involvement marks a quest as part of a faction's (or the world's) story.
 LORE_FIGURES = {
     "Thrall", "Cairne Bloodhoof", "Lady Sylvanas Windrunner", "Vol'jin", "Rexxar", "Eitrigg",
     "Varimathras", "Nazgrel", "Neeru Fireblade", "Magatha Grimtotem", "Hamuul Runetotem",
@@ -54,6 +64,12 @@ LORE_FIGURES = {
     "Baristolth of the Shifting Sands", "Arch Druid Fandral Staghelm", "Keeper Remulos",
     "Erunak Stonespeaker", "Ralo'shan the Eternal Watcher", "Duke Hydraxis", "Lothos Riftwaker",
     "Highlord Taelan Fordring", "Nara Wildmane",
+    # Alliance
+    "King Magni Bronzebeard", "Highlord Bolvar Fordragon", "Lady Katrana Prestor", "Varian Wrynn",
+    "Tyrande Whisperwind", "Lady Jaina Proudmoore", "High Tinker Mekkatorque", "Archbishop Benedictus",
+    "Marshal Windsor", "Reginald Windsor", "Master Mathias Shaw", "Gryan Stoutmantle",
+    "Shandris Feathermoon", "Commander Ashlam Valorfist", "Royal Historian Archesonus",
+    "Lord Gregor Lescovar", "Vanndar Stormpike", "Prospector Stormpike", "Archmage Tervosh",
 }
 LORE_WORDS = [
     "thrall", "warchief", "horde", "alliance", "scourge", "lich king", "kel'thuzad", "arthas",
@@ -65,6 +81,15 @@ LORE_WORDS = [
     "night elf", "emerald dream", "nightmare", "elemental", "betray", "traitor", "forsaken",
     "dark iron", "dragonkin", "naaru", "tauren", "earthmother", "spirit", "elder", "lord",
 ]
+# Lore terms only one faction's quests lean on. The Horde's are in LORE_WORDS above.
+FACTION_LORE_WORDS = {
+    "Horde": [],
+    "Alliance": [
+        "stormwind", "ironforge", "darnassus", "gnomeregan", "theramore", "lordaeron", "kul tiras",
+        "bronzebeard", "magni", "wildhammer", "stormpike", "mekkatorque", "proudmoore", "jaina",
+        "tyrande", "bolvar", "wrynn", "defias", "silver hand",
+    ],
+}
 # Story names chosen by hand where the rule-based name (story_name) picks an errand, a report
 # or a side character instead of the story, or where a character would see two stories with
 # the same name. Keyed by story ID ("q" + first quest ID); each new name is one of the
@@ -92,6 +117,18 @@ NAME_OVERRIDES = {
     "q1000": "Uncovering Past Secrets",    # was "Umber, Archivist"
     "q4001": "The Royal Rescue",           # was "What Is Going On?"
     "q9032": "Lord Valthalak's Amulet",    # was "The Left Piece of...": shortened, covers both halves
+    # Alliance. Warlock pets, as above: both were "The Binding".
+    "q1685": "Surena Caledon",             # the Voidwalker (level 10): the warlock you hunt for it
+    "q1798": "Tome of the Cabal",          # the Felhunter (level 30)
+    "q40": "Discover Rolf's Fate",         # was "Cloth and Leather Armor", a delivery
+    "q298": "Protecting the Shipment",     # was "Powder to Ironband", a delivery
+    "q730": "The Absent Minded Prospector",  # was "Trouble In Darkshore?", the opening errand
+    "q373": "The Unsent Letter",           # was "Look to an Old Friend": the letter uncovers the plot
+    "q164": "The Shadowy Figure",          # was "Lightforge Iron", an item along the way
+    "q468": "Nek'rosh's Gambit",           # was "War Banners", a collection
+    "q1448": "Into The Temple of Atal'Hakkar",  # was "Rhapsody's Tale", a side character
+    "q5097": "The Key to Scholomance",     # was "All Along the Watchtowers", the first step
+    "q8960": "Lord Valthalak's Amulet",    # was "The Left Piece of...", as for the Horde
 }
 
 FILLER_PENALTY = 2.5   # "collect/kill 5+ of something ordinary"
@@ -174,30 +211,30 @@ def load_forever_maps():
 
 # --- Filtering ------------------------------------------------------------------------
 
-def alliance_only_giver(q, npcs):
+def enemy_only_giver(q, npcs, faction):
     starters = lua_list((q.get("2") or {}).get("1"))
     factions = [(npcs.get(str(n)) or {}).get("13") for n in starters]
-    return bool(factions) and all(f == "A" for f in factions)
+    return bool(factions) and all(f == faction["enemy_npc"] for f in factions)
 
 
-def is_obtainable(qid, q, blacklist, npcs):
-    """In the game and open to some Horde character. Required quests are resolved against
-    this, so a chain never loses a step the player must do, even a repeatable one."""
+def is_obtainable(qid, q, blacklist, npcs, faction):
+    """In the game and open to some character of the faction. Required quests are resolved
+    against this, so a chain never loses a step the player must do, even a repeatable one."""
     name = q.get("1") or ""
     races = q.get("6") or 0
     classes = q.get("7") or 0
-    if alliance_only_giver(q, npcs) or int(qid) in blacklist or not name:
+    if enemy_only_giver(q, npcs, faction) or int(qid) in blacklist or not name:
         return False
-    if races and not (races & HORDE_RACES):
+    if races and not (races & faction["races"]):
         return False
-    if classes and not (classes & ~ALLIANCE_ONLY_CLASSES):
+    if classes and not (classes & ~faction["enemy_classes"]):
         return False
     return not re.search(r"UNUSED|<NYI>|\[PH\]|\bTEST\b|DEPRECATED|<TXT>|zzOLD", name)
 
 
-def is_candidate(qid, q, blacklist, npcs):
+def is_candidate(qid, q, blacklist, npcs, faction):
     """Obtainable, and the kind of quest that can be story."""
-    if not is_obtainable(qid, q, blacklist, npcs):
+    if not is_obtainable(qid, q, blacklist, npcs, faction):
         return False
     flags = q.get("24") or 0
     sort = q.get("17") or 0
@@ -209,9 +246,10 @@ def is_candidate(qid, q, blacklist, npcs):
 # --- Scoring ----------------------------------------------------------------------------
 
 class Scorer:
-    def __init__(self, data, instances):
+    def __init__(self, data, instances, faction_name):
         self.q, self.npc, self.item, self.obj, self.text = data["quest"], data["npc"], data["item"], data["object"], data["text"]
         self.instances = instances
+        self.words = LORE_WORDS + FACTION_LORE_WORDS[faction_name]
         self.figure_ids = {nid for nid, n in self.npc.items() if n.get("1") in LORE_FIGURES}
 
     def spawn_count(self, npc_id):
@@ -270,7 +308,7 @@ class Scorer:
     def lore_words(self, qid):
         """The LORE_WORDS that appear in a quest's description and objective."""
         text = (self.description(qid) + " " + self.objective_text(qid, self.q[qid])).lower()
-        return {w for w in LORE_WORDS if re.search(r"\b" + re.escape(w) + r"\b", text)}
+        return {w for w in self.words if re.search(r"\b" + re.escape(w) + r"\b", text)}
 
     def is_filler(self, qid):
         """Whether score() applied the filler penalty to this quest."""
@@ -445,7 +483,7 @@ def add_prerequisites(chosen, quests, obtainable, weight):
     preQuestSingle needs one of its list. Pull every required quest into the story that needs
     it, unless another kept story already has it: then the chapter records it under `after`,
     and the book says which tale to finish first. Required quests come from every quest a
-    Horde player can get, not just story candidates (the Royal Rescue's escort is repeatable,
+    player of the faction can get, not just story candidates (the Royal Rescue's escort is repeatable,
     but you still have to do it). A quest belongs to one story only: when two stories need
     the same one, the first (in level order) takes it and the other points at it. Runs after
     selection and keeps each story's ID, so it never changes which stories are kept or
@@ -496,9 +534,9 @@ def mask_to_ids(mask):
 
 
 class Assembler:
-    def __init__(self, data, scorer, zones, scores):
+    def __init__(self, data, scorer, zones, scores, faction):
         self.q, self.npc, self.obj, self.text = data["quest"], data["npc"], data["object"], data["text"]
-        self.scorer, self.zones, self.scores = scorer, zones, scores
+        self.scorer, self.zones, self.scores, self.faction = scorer, zones, scores, faction
         self.ui_maps = load_ui_maps()
         self.forever_maps = load_forever_maps()
         self.npc_names = {n.get("1") for n in self.npc.values() if n.get("1")}
@@ -547,6 +585,10 @@ class Assembler:
         entry = q.get(field) or {}
         for kind, index in (("npc", "1"), ("object", "2")):
             ids = lua_list(entry.get(index))
+            if kind == "npc":
+                # Class quests list trainers of both factions; send players to their own.
+                ours = [i for i in ids if (self.npc.get(str(i)) or {}).get("13") != self.faction["enemy_npc"]]
+                ids = ours or ids
             if ids:
                 return self.place(kind, ids[0])
         return {}
@@ -623,7 +665,7 @@ class Assembler:
             for mask in by_name.values():
                 result &= mask
             return 0 if result == everyone else result or None  # None: nobody can do it all
-        return combine("6", HORDE_RACES), combine("7", HORDE_CLASSES)
+        return combine("6", self.faction["races"]), combine("7", self.faction["classes"])
 
     def story(self, raw):
         members = topo_order(set(raw["path"] + raw["extra"]), self.scorer.succ, self.scorer.pred)
@@ -723,13 +765,13 @@ def lua_value(value):
     raise TypeError(value)
 
 
-def write_lua(stories, path):
+def write_lua(stories, path, faction_name):
     lines = [
         "-- GENERATED by tools/build_stories.py - do not edit by hand.",
         "-- Quest data: QuestieDB (vanilla / Classic Era). Quest text: pfQuest (MIT). Text (c) Blizzard Entertainment.",
         "local _, Lore = ...",
         "",
-        "Lore.stories = {",
+        f"Lore.storyData.{faction_name} = {{",
     ]
     story_keys = ["id", "name", "zone", "minLevel", "maxLevel", "importance", "kind", "races", "classes"]
     quest_keys = ["ids", "name", "level", "zone", "giver", "giverMap", "giverX", "giverY", "giverInside",
@@ -773,15 +815,16 @@ def warn_duplicate_names(stories):
                 print(f"warning: duplicate story name {a['name']!r}: {a['id']} and {b['id']} (add a NAME_OVERRIDES entry)")
 
 
-def main():
-    report = "--report" in sys.argv
-    data = load()
+def build_faction(faction_name, data, zones, instances, report):
+    """Runs the whole pipeline for one faction and writes its data file. Returns the IDs of
+    the stories kept."""
+    faction = FACTIONS[faction_name]
     quests = data["quest"]
-    zones = load_zone_names()
-    scorer = Scorer(data, load_instances())
+    scorer = Scorer(data, instances, faction_name)
+    out = DATA / f"{faction_name}Stories.lua"
 
-    obtainable = {qid for qid, q in quests.items() if is_obtainable(qid, q, data["blacklist"], data["npc"])}
-    ids = {qid for qid in obtainable if is_candidate(qid, quests[qid], data["blacklist"], data["npc"])}
+    obtainable = {qid for qid, q in quests.items() if is_obtainable(qid, q, data["blacklist"], data["npc"], faction)}
+    ids = {qid for qid in obtainable if is_candidate(qid, quests[qid], data["blacklist"], data["npc"], faction)}
     scores = {qid: scorer.score(qid) for qid in obtainable}
     # Every quest keeps a small positive weight so chains still connect through plain links.
     weight = {qid: max(scores[qid][0], -1.0) + 1.0 for qid in ids}
@@ -790,7 +833,7 @@ def main():
     scorer.succ, scorer.pred = build_graph(quests, obtainable)
     raw = extract_stories(ids, scorer.succ, scorer.pred, weight)
 
-    assembler = Assembler(data, scorer, zones, scores)
+    assembler = Assembler(data, scorer, zones, scores, faction)
     candidates = []
     for r in raw:
         story = assembler.story(r)
@@ -810,14 +853,11 @@ def main():
         rebuilt.append(story)
     chosen = sorted(rebuilt, key=lambda s: (s["minLevel"], -s["importance"], -s["score"]))
     check_unique(chosen)
-    unused = set(NAME_OVERRIDES) - {s["id"] for s in chosen}
-    if unused:
-        print("warning: NAME_OVERRIDES for stories no longer kept:", ", ".join(sorted(unused)))
     warn_duplicate_names(chosen)
-    write_lua(chosen, OUT)
+    write_lua(chosen, out, faction_name)
 
-    print(f"candidate quests: {len(ids)}  candidate stories: {len(candidates)}  kept: {len(chosen)}")
-    print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")
+    print(f"{faction_name}: candidate quests: {len(ids)}  candidate stories: {len(candidates)}  kept: {len(chosen)}")
+    print(f"wrote {out} ({out.stat().st_size // 1024} KB)")
     by_kind = collections.Counter(s["kind"] for s in chosen)
     print("by kind:", dict(by_kind))
     for s in chosen:
@@ -830,6 +870,21 @@ def main():
                 for q in s["quests"]:
                     sc, why = scores[str(q["ids"][0])]
                     print(f"           {sc:5.1f} {q['name']} [{q['ids'][0]}] {'; '.join(why)}")
+    print()
+    return {s["id"] for s in chosen}
+
+
+def main():
+    report = "--report" in sys.argv
+    data = load()
+    zones = load_zone_names()
+    instances = load_instances()
+    kept = set()
+    for faction_name in FACTIONS:
+        kept |= build_faction(faction_name, data, zones, instances, report)
+    unused = set(NAME_OVERRIDES) - kept
+    if unused:
+        print("warning: NAME_OVERRIDES for stories no longer kept:", ", ".join(sorted(unused)))
 
 
 if __name__ == "__main__":

@@ -46,7 +46,7 @@ local function Prerequisites(L, quest)
         local other, index = Lore:GetChapter(questID)
         if other and not Lore:IsQuestDone(questID) then
             L:Text(("Needs %s from %s first (chapter %s)."):format(other.quests[index].name, other.name, UI.Roman(index)),
-                { indent = NUMERAL_W, size = 12, color = "crimson", gap = 8 })
+                { indent = NUMERAL_W, size = 12, color = "accent", gap = 8 })
         end
     end
 end
@@ -54,8 +54,8 @@ end
 local function OpenChapter(L, story, quest, index, state, key, pinned)
     L:Space(4)
     local row = L:Row(22, 4)
-    UI.RowText(row, UI.Roman(index), { font = "title", size = 13, width = NUMERAL_W, color = "crimson" })
-    UI.RowText(row, quest.name, { font = "title", size = 16, x = NUMERAL_W, wrap = false, color = "crimson" })
+    UI.RowText(row, UI.Roman(index), { font = "title", size = 13, width = NUMERAL_W, color = "accent" })
+    UI.RowText(row, quest.name, { font = "title", size = 16, x = NUMERAL_W, wrap = false, color = "accent" })
     if not pinned then
         row:SetScript("OnClick", function() ToggleChapter(key) end)
     end
@@ -66,7 +66,7 @@ local function OpenChapter(L, story, quest, index, state, key, pinned)
         L:Text(Lore:FormatQuestText(quest.summary), { indent = NUMERAL_W, size = 13, gap = 14 })
     end
     if quest.objective then
-        L:Text("Objective", { font = "title", indent = NUMERAL_W, size = 13, color = "crimson", gap = 3 })
+        L:Text("Objective", { font = "title", indent = NUMERAL_W, size = 13, color = "accent", gap = 3 })
         L:Text(Lore:FormatQuestText(quest.objective), { indent = NUMERAL_W, size = 12, gap = 6 })
     end
     if quest.giver then
@@ -108,7 +108,7 @@ local function RenderEmpty(L)
     L:Text("Pick up a quest from any tale in the Chronicle and Lore will follow it from your quest log.",
         { size = 13, justify = "CENTER", color = "faded", gap = 10 })
     L:Divider()
-    L:Text("Tales for your level", { font = "title", size = 14, color = "crimson", gap = 6 })
+    L:Text("Tales for your level", { font = "title", size = 14, color = "accent", gap = 6 })
     SuggestionRows(L, Lore:SuggestStories(6))
 end
 
@@ -126,7 +126,7 @@ UI.RegisterTab({
 
         local chapter = progress.activeIndex or (progress.done + 1)
         L:Text(("Chapter %s of %s"):format(UI.Roman(chapter), UI.Roman(#story.quests)),
-            { font = "title", size = 13, color = "crimson", justify = "CENTER", gap = 2 })
+            { font = "title", size = 13, color = "accent", justify = "CENTER", gap = 2 })
         L:Text(story.name, { font = "title", size = 20, justify = "CENTER", gap = 2 })
         L:Text(("%s - levels %d-%d"):format(story.zone, story.minLevel, story.maxLevel),
             { size = 11, color = "faded", justify = "CENTER", gap = 8 })
@@ -138,7 +138,7 @@ UI.RegisterTab({
         if #after > 0 then
             L:Space(8)
             L:Divider()
-            L:Text("When this tale ends", { font = "title", size = 14, color = "crimson", gap = 6 })
+            L:Text("When this tale ends", { font = "title", size = 14, color = "accent", gap = 6 })
             SuggestionRows(L, after)
         end
     end,

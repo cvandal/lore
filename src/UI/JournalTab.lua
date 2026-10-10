@@ -41,7 +41,7 @@ UI.RegisterTab({
             local row = L:Row(20, 2)
             UI.RowText(row, item.story.name, { font = "title", size = 15, width = L.width - DATE_W, wrap = false })
             UI.RowText(row, UI.FormatDay(item.entry.completedAt), { anchor = "RIGHT", width = DATE_W,
-                justify = "RIGHT", wrap = false, size = 12, color = "crimson" })
+                justify = "RIGHT", wrap = false, size = 12, color = "accent" })
             row:SetScript("OnClick", function() UI.ShowStory(item.story) end)
             UI.AddTooltip(row, { item.story.name, "Click to read it again." })
             L:Text(Sentence(item.story, item.entry), { size = 13, color = "faded", gap = 12 })
@@ -49,7 +49,7 @@ UI.RegisterTab({
 
         if #undated > 0 then
             L:Space(4)
-            L:Text("Completed before Lore", { font = "title", size = 14, color = "crimson", gap = 4 })
+            L:Text("Completed before Lore", { font = "title", size = 14, color = "accent", gap = 4 })
             for _, item in ipairs(undated) do
                 local row = L:Row(20, 1)
                 UI.RowText(row, item.story.name, { width = L.width - DATE_W, wrap = false, size = 13 })
