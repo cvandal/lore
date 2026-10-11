@@ -1,7 +1,7 @@
 local ADDON_NAME, Lore = ...
 _G.Lore = Lore
 
-Lore.version = "0.2.0"
+Lore.version = "0.3.0"
 Lore.storyData = {}  -- [faction] = stories, filled by Data/<Faction>Stories.lua
 
 local defaults = {
@@ -13,6 +13,7 @@ local defaults = {
         minimapHidden = false,
         messages = true,     -- chat messages when a tale begins, moves on or ends
         badges = true,       -- mark story quests in NPC lists, the quest window and quest log tooltips
+        horn = true,         -- a war horn when a story quest's window opens
     },
 }
 
@@ -151,6 +152,13 @@ Lore.options = {
             Lore.UI.MarkQuestLog()
             Lore.UI.UpdateQuestTag()
         end,
+    },
+    {
+        command = "horn",
+        label = "War horn",
+        description = "Sound your faction's war horn when a story quest opens, so you don't click past it.",
+        get = function() return settings().horn end,
+        set = function(on) settings().horn = on end,
     },
     {
         command = "messages",

@@ -112,6 +112,7 @@ please open an issue.
 | `/lore pins`     | Turn map pins on or off                                 |
 | `/lore minimap`  | Show or hide the minimap button                         |
 | `/lore badges`   | Turn story badges on or off                             |
+| `/lore horn`     | Turn the story quest war horn on or off                 |
 | `/lore messages` | Turn story messages in chat on or off                   |
 | `/lore reset`    | Move the book back to the middle of the screen          |
 | `/lore debug`    | Report what Lore sees in an NPC window, for bug reports |

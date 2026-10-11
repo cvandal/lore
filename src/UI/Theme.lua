@@ -28,6 +28,7 @@ Theme.factions = {
             leather = { 0.29, 0.15, 0.09 },
         },
         crest = "Interface\\TargetingFrame\\UI-PVP-Horde",
+        horn = 8212,  -- PVPFlagTakenHorde: Warsong Gulch's Horde war horn
     },
     Alliance = {
         accentName = "Blue",
@@ -36,6 +37,7 @@ Theme.factions = {
             leather = { 0.10, 0.14, 0.28 },
         },
         crest = "Interface\\TargetingFrame\\UI-PVP-Alliance",
+        horn = 8174,  -- PVPFlagTaken: Warsong Gulch's Alliance war horn
     },
 }
 
@@ -47,6 +49,7 @@ function Theme.Apply(faction)
     end
     Theme.textures.crest = f.crest
     Theme.accentName = f.accentName
+    Theme.horn = f.horn
 end
 
 Theme.textures = {

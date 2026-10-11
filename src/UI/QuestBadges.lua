@@ -323,6 +323,12 @@ events:SetScript("OnEvent", function(_, event)
     elseif event == "QUEST_GREETING" then
         HideTag()
         Later(UI.MarkGreeting)
+    elseif event == "QUEST_DETAIL" then
+        UI.UpdateQuestTag()
+        -- Only on the offer page: progress and reward pages are quests you already chose.
+        if Lore.db.settings.horn and Lore:GetChapter(GetQuestID and GetQuestID() or 0) then
+            PlaySound(Theme.horn, "Master")
+        end
     elseif event == "QUEST_FINISHED" then
         HideTag()
     elseif event == "QUEST_LOG_UPDATE" then

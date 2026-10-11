@@ -219,12 +219,21 @@ assert(ns.UI.MarkGreeting() == 0, "same title from another NPC is not")
 -- The tag beside the quest window names the tale and chapter.
 QuestFrame = Obj()
 GetQuestID = function() return 806 end
+local played = {}
+PlaySound = function(id) played[#played + 1] = id end
 onEvent(nil, "QUEST_DETAIL")
+assert(played[1] == 8212, "a story quest's offer sounds the Horde horn")
 print("quest tag:", LoreQuestTag.story._text, "/", LoreQuestTag.chapter._text)
 assert(LoreQuestTag:IsShown() and LoreQuestTag.chapter._text == "Chapter II of " .. ns.UI.Roman(#tale.quests))
 GetQuestID = function() return 999999 end
 onEvent(nil, "QUEST_DETAIL")
 assert(not LoreQuestTag:IsShown(), "no tag on filler quests")
+assert(#played == 1, "no horn on filler quests")
+GetQuestID = function() return 806 end
+SlashCmdList.LORE("horn")
+onEvent(nil, "QUEST_DETAIL")
+assert(#played == 1 and not ns.db.settings.horn, "/lore horn silences it")
+SlashCmdList.LORE("horn")
 SlashCmdList.LORE("debug")  -- the diagnostic must not error
 
 -- Chronicle: clicking a tale opens its page; "Show me where..." marks the map; back returns.
@@ -327,7 +336,7 @@ assert(LoreMinimapButton:IsShown())
 local helpLines = 0
 DEFAULT_CHAT_FRAME.AddMessage = function(_, m) if m:find("/lore") then helpLines = helpLines + 1 end end
 SlashCmdList.LORE("help")
-assert(helpLines == #ns.commands and #ns.commands == 8, "help lists every command")
+assert(helpLines == #ns.commands and #ns.commands == 9, "help lists every command")
 DEFAULT_CHAT_FRAME.AddMessage = addMessage
 
 -- Quest log: Retail-style frames. A story title (Margoz, 828), a filler title, an objective
