@@ -41,6 +41,7 @@ end
 local events = CreateFrame("Frame")
 events:RegisterEvent("ADDON_LOADED")
 events:RegisterEvent("PLAYER_LOGIN")
+events:RegisterEvent("PLAYER_LEVEL_UP")
 events:RegisterEvent("QUEST_LOG_UPDATE")
 events:RegisterEvent("QUEST_TURNED_IN")
 events:RegisterEvent("QUEST_ACCEPTED")
@@ -80,6 +81,11 @@ function Lore:QUEST_LOG_UPDATE()
     self:RequestRefresh()
 end
 
+function Lore:PLAYER_LEVEL_UP()
+    -- UnitLevel updates after the event; the deferred refresh reads the new level.
+    self:RequestRefresh()
+end
+
 -- Classic clients pass (questLogIndex, questID); WoW Forever passes just the questID.
 function Lore:QUEST_ACCEPTED(first, second)
     if not self.faction then return end
@@ -100,6 +106,9 @@ function Lore:RequestRefresh()
     refreshPending = true
     C_Timer.After(0.2, function()
         refreshPending = false
+        -- Completion flags can arrive later than the login timer, especially on a
+        -- first login. Reconcile them before drawing suggestions and the journal.
+        Lore:RecordPreLoreCompletions()
         Lore.UI.Refresh()
         Lore:RefreshPins()
     end)

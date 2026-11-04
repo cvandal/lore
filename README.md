@@ -95,7 +95,7 @@ please open an issue.
 2. Unzip it into your WoW Forever AddOns folder, so you end up with:
 
    ```
-   World of Warcraft/_classic_beta_/Interface/AddOns/Lore/Lore.toc
+   World of Warcraft/_forever_/Interface/AddOns/Lore/Lore.toc
    ```
 
 3. Start the game, or restart it if it's running, and make sure **Lore** is ticked in the

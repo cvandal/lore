@@ -8,15 +8,15 @@ it does and how to install it, see the [README](README.md).
 Symlink `src` into the game's AddOns folder as `Lore`, so edits show up without copying:
 
 ```sh
-ln -s "$PWD/src" "/Applications/World of Warcraft/_classic_beta_/Interface/AddOns/Lore"
+ln -s "$PWD/src" "/Applications/World of Warcraft/_forever_/Interface/AddOns/Lore"
 ```
 
 - `/reload` picks up edits to existing files.
 - Adding or removing files, or editing `Lore.toc`, needs a full game restart.
 
-WoW Forever is the `_classic_beta_` client (Questie calls it "Camelot"), so `Lore.toc`
-uses `## Interface: 16001`. It runs Retail-style UI on Classic map data, which explains most
-of the client notes below.
+WoW Forever uses the `_forever_` client folder (Questie calls the game type "Camelot").
+The installed launch client is 1.60.1.70790; `Lore.toc` uses `## Interface: 16001`.
+It runs Retail-style UI on Classic map data, which explains most of the client notes below.
 
 ## Making a release
 
@@ -146,6 +146,17 @@ build uses: it moves pins and adds no content.
 
 ## Client notes
 
+Launch review: checked against the installed 1.60.1.70790 client and the Forever UI
+source mirror on 5 November 2026. Interface 16001 and the existing modern quest API
+paths still match. Sources: [Forever quest API](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/QuestLogDocumentation.lua),
+[quest greeting UI](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_UIPanels_Game/Mainline/QuestFrame.lua),
+and [Questie's Forever TOC](https://github.com/Questie/Questie/blob/master/Questie_Camelot.toc).
+Automated tests use mocked game APIs; live rendering, controller
+navigation and map accuracy still need an in-game check.
+
+- **Refresh timing**: quest log updates reconcile late completion flags with the journal;
+  level-up events defer their refresh until `UnitLevel` reflects the new level, so
+  suggested tales and pins stay current.
 - **Quest log**: Forever has no `GetQuestLogTitle`. Lore uses `C_QuestLog.GetInfo` and
   falls back to the old API on other clients.
 - **`QUEST_ACCEPTED`**: Classic passes `(questLogIndex, questID)`, Forever just the ID.

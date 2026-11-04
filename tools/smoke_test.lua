@@ -315,6 +315,35 @@ SlashCmdList.LORE("messages")
 assert(Said(function() ns:QUEST_ACCEPTED(fresh.quests[1].ids[1]) end) == nil, "/lore messages turns them off")
 SlashCmdList.LORE("messages")
 
+-- Completion flags may arrive after the fixed login delay. A later log update
+-- must reconcile the journal, without changing dated completions from this session.
+local delayed = fresh.quests[#fresh.quests].ids[1]
+DONE[delayed] = true
+assert(not ns:GetJournalEntry(fresh.id), "late flags have not yet been reconciled")
+ns:QUEST_LOG_UPDATE()
+assert(ns:GetJournalEntry(fresh.id).preLore, "late completion flags populate the journal")
+assert(ns:GetJournalEntry(tale.id).completedAt, "session completion keeps its date")
+DONE[delayed] = nil
+
+-- Model the real timer: level and quest events coalesce, and UnitLevel changes
+-- after PLAYER_LEVEL_UP rather than being read from its event handler.
+local after, playerLevel, refreshPins = C_Timer.After, UnitLevel, ns.RefreshPins
+local pending, observedLevel, refreshes = {}, nil, 0
+C_Timer.After = function(delay, fn)
+    pending[#pending + 1] = fn
+end
+ns.RefreshPins = function(self)
+    refreshes = refreshes + 1
+    observedLevel = self:PlayerLevel()
+end
+ns:PLAYER_LEVEL_UP(10)
+ns:QUEST_LOG_UPDATE()
+assert(#pending == 1 and refreshes == 0, "event bursts schedule one deferred refresh")
+UnitLevel = function() return 10 end
+pending[1]()
+assert(refreshes == 1 and observedLevel == 10, "level-up refresh reads the updated player level")
+C_Timer.After, UnitLevel, ns.RefreshPins = after, playerLevel, refreshPins
+
 -- Settings: /lore settings opens the tab; each option is a checkbox that matches its setting
 -- and its slash command; every command is listed; unknown input prints the same list.
 LoreFrame:Hide()
