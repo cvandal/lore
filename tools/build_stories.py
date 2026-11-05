@@ -749,6 +749,26 @@ def select(stories):
     return chosen
 
 
+def add_story_prologues(stories, assembler):
+    """Narrative connections absent from Questie prerequisites; preserve saved tale IDs.
+
+    The training branch is introductory context, not a claimed game prerequisite.
+    Warlocks investigate the familiars through Ruzan before reporting to Zureetha.
+    """
+    for story in stories:
+        if story["id"] != "q823":
+            continue
+        opening = [assembler.quest_entry(q) for q in ("4641", "788", "792", "794", "805")]
+        familiars = opening[2]
+        familiars["ids"] += [1485, 1499]
+        variant = assembler.quest_entry("1485")
+        variant["classID"] = 9  # Warlock; the book chooses this chapter's text and giver.
+        familiars["variants"] = [variant]
+        story["quests"] = opening + story["quests"]
+        story["minLevel"] = 1
+        story["zone"] = opening[0]["zone"]
+
+
 # --- Lua output ------------------------------------------------------------------------
 
 def lua_value(value):
@@ -760,6 +780,8 @@ def lua_value(value):
         return repr(value)
     if isinstance(value, str):
         return '"' + value.replace("\\", "\\\\").replace('"', '\\"').replace("\r", "").replace("\n", "\\n") + '"'
+    if isinstance(value, dict):
+        return "{ " + ", ".join(f"{k} = {lua_value(v)}" for k, v in value.items() if v is not None) + " }"
     if isinstance(value, list):
         return "{ " + ", ".join(lua_value(v) for v in value) + " }"
     raise TypeError(value)
@@ -775,7 +797,7 @@ def write_lua(stories, path, faction_name):
     ]
     story_keys = ["id", "name", "zone", "minLevel", "maxLevel", "importance", "kind", "races", "classes"]
     quest_keys = ["ids", "name", "level", "zone", "giver", "giverMap", "giverX", "giverY", "giverInside",
-                  "ender", "enderMap", "enderX", "enderY", "enderInside", "after", "objective", "summary"]
+                  "ender", "enderMap", "enderX", "enderY", "enderInside", "after", "objective", "summary", "variants"]
     for s in stories:
         lines.append("    {")
         for k in story_keys:
@@ -852,6 +874,7 @@ def build_faction(faction_name, data, zones, instances, report):
         story["importance"] = old["importance"]
         rebuilt.append(story)
     chosen = sorted(rebuilt, key=lambda s: (s["minLevel"], -s["importance"], -s["score"]))
+    add_story_prologues(chosen, assembler)
     check_unique(chosen)
     warn_duplicate_names(chosen)
     write_lua(chosen, out, faction_name)

@@ -53,7 +53,7 @@ UnitRace = function() return "Orc", "Orc", 2 end
 UnitClass = function() return "Warrior", "WARRIOR", 1 end
 UnitSex = function() return 2 end
 GetRealZoneText = function() return "Durotar" end
-LOG = { 823 }       -- Report to Orgnil: first quest of the Burning Blade story
+LOG = { 823 }       -- Report to Orgnil: a chapter of the Burning Blade story
 local DONE = { [753] = true, [775] = true }  -- finished Rites of the Earthmother before Lore
 C_QuestLog = {
     IsQuestFlaggedCompleted = function(id) return DONE[id] or false end,
@@ -145,9 +145,12 @@ do
     UnitLevel = function() return level end
     GetRealZoneText = function() return zone end
     ns.myStories = { ns.storiesById.q823, ns.storiesById.q752 }
-    assert(#ns:SuggestStories(6) == 0, "a fresh Orc is not sent to Mulgore")
+    assert(#ns:SuggestStories(6) == 1 and ns:SuggestStories(6)[1].id == "q823", "a fresh Orc gets the local prologue")
+    local opening = ns:SuggestStories(6)[1].quests[1]
+    assert(opening.ids[1] == 4641 and opening.giver == "Kaltunk", "the opening points to Kaltunk")
+    ns.myStories = { ns.storiesById.q752 }
     assert(ns:GetSuggestionGuidance():find("Durotar", 1, true), "empty suggestions explain where to adventure")
-    assert(ns:GetSuggestionGuidance():find("level 2", 1, true), "guidance uses the existing level allowance")
+    ns.myStories = { ns.storiesById.q823, ns.storiesById.q752 }
     level = 4
     assert(ns:SuggestStories(6)[1].id == "q823" and #ns:SuggestStories(6) == 1, "local tale appears as levels permit")
     assert(#ns:SuggestStories(6, "q823") == 0, "excluded tales stay excluded")
@@ -231,8 +234,8 @@ assert(#PINS == 0, "resuming a tale clears recommendation pins")
 -- Show on the map: only adds a pin where the map has none. Dark Storms is in the log (the
 -- game marks it); a future chapter is pinned only when explicitly requested.
 local tale = ns:GetCurrentStory()
-assert(ns:ShowOnMap(tale, 2) == "game" and #PINS == 0, "a chapter in the log gets no Lore pin")
-assert(ns:ShowOnMap(tale, 3) == "marked" and #PINS == 2, "explicitly requesting a future chapter adds its pin")
+assert(ns:ShowOnMap(tale, 7) == "game" and #PINS == 0, "a chapter in the log gets no Lore pin")
+assert(ns:ShowOnMap(tale, 8) == "marked" and #PINS == 2, "explicitly requesting a future chapter adds its pin")
 assert(ns:ShowOnMap(tale, #tale.quests) == "marked" and #PINS == 2, "any other chapter gets a pin")
 print("marked map:", WorldMapFrame._map, "pins now", #PINS)
 SlashCmdList.LORE("pins")
@@ -274,7 +277,7 @@ SlashCmdList.LORE("badges")
 assert(ns.UI.BadgeOn(gossipButtons[1]):IsShown(), "turning badges on marks it again")
 
 -- Quest greeting without quest IDs: the title only counts when this NPC gives that chapter.
-local darkStorms = tale.quests[2]
+local darkStorms = tale.quests[7]
 UnitName = function(unit) if unit == "npc" then return darkStorms.giver end return "Grukk" end
 local greet = Obj(); greet.isActive = 0; greet.GetID = function() return 1 end; greet.GetText = function() return darkStorms.name end
 QuestFrameGreetingPanel = Obj()
@@ -291,7 +294,7 @@ PlaySound = function(id) played[#played + 1] = id end
 onEvent(nil, "QUEST_DETAIL")
 assert(played[1] == 8212, "a story quest's offer sounds the Horde horn")
 print("quest tag:", LoreQuestTag.story._text, "/", LoreQuestTag.chapter._text)
-assert(LoreQuestTag:IsShown() and LoreQuestTag.chapter._text == "Chapter II of " .. ns.UI.Roman(#tale.quests))
+assert(LoreQuestTag:IsShown() and LoreQuestTag.chapter._text == "Chapter VII of " .. ns.UI.Roman(#tale.quests))
 GetQuestID = function() return 999999 end
 onEvent(nil, "QUEST_DETAIL")
 assert(not LoreQuestTag:IsShown(), "no tag on filler quests")
@@ -365,9 +368,9 @@ local said
 local addMessage = DEFAULT_CHAT_FRAME.AddMessage
 DEFAULT_CHAT_FRAME.AddMessage = function(self, m) said = m; addMessage(self, m) end
 local function Said(fn) said = nil; fn(); return said and said:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") end
-assert(Said(function() ns:QUEST_TURNED_IN(806) end):find("Ak'Zeloth, chapter II of VII done. Next: Margoz, from Orgnil Soulscar.", 1, true))
+assert(Said(function() ns:QUEST_TURNED_IN(806) end):find("Ak'Zeloth, chapter VII of XII done. Next: Margoz, from Orgnil Soulscar.", 1, true))
 LOG, DONE[806] = { 828 }, true
-assert(Said(function() ns:QUEST_ACCEPTED(828) end):find("Ak'Zeloth, chapter III of VII: Margoz.", 1, true))
+assert(Said(function() ns:QUEST_ACCEPTED(828) end):find("Ak'Zeloth, chapter VIII of XII: Margoz.", 1, true))
 local fresh
 for _, s in ipairs(ns.myStories) do
     if ns:GetStoryProgress(s).done == 0 and not ns:IsStoryComplete(s) then fresh = s; break end
@@ -517,3 +520,23 @@ assert(ns.faction == nil and #ns.stories == 0 and not LoreMinimapButton, "nothin
 SlashCmdList.LORE("")
 assert(not LoreFrame, "the book doesn't open")
 print("SMOKE OK")
+
+-- The prologue preserves its order, and warlocks get their own giver and objective.
+do
+    local horde = LoadAddon()
+    horde:LoadStories("Horde")
+    local story = horde.storiesById.q823
+    for index, id in ipairs({4641, 788, 792, 794, 805, 823}) do
+        assert(story.quests[index].ids[1] == id, "Orc prologue chapter order")
+    end
+    assert(not horde.questToStory[789], "Sting of the Scorpid is outside the tale")
+    local oldClass = UnitClass
+    UnitClass = function() return "Warlock", "WARLOCK", 9 end
+    local warlock = LoadAddon()
+    warlock:LoadStories("Horde")
+    local chapter = warlock.storiesById.q823.quests[3]
+    assert(chapter.giver == "Ruzan" and chapter.objective:find("Heads", 1, true), "warlock familiars route uses Ruzan")
+    assert(warlock.questToStory[1499].id == "q823", "warlock report continues the same tale")
+    UnitClass = oldClass
+    _G.Lore = ns
+end

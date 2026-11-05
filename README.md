@@ -50,7 +50,7 @@ Around the game world it also:
 
 ## How story quests are chosen
 
-Nobody picks the stories by hand. A build script reads the full quest database and decides,
+A build script reads the full quest database and decides,
 using the same rules for every quest. It runs in five steps, once for each faction, so the
 Horde and the Alliance each get their own tales.
 
@@ -91,6 +91,10 @@ The result is 110 Horde tales (50 in the open world, 29 leading into dungeons, 6
 and 25 class quests) and 116 Alliance tales (55, 29, 5 and 27). Each takes its name from one
 of its quests, and a few names were adjusted where the rule picked an errand instead of the
 story.
+
+Explicit narrative connections supplement those rules where the database has no prerequisite
+link. Ak'Zeloth includes the Valley of Trials opening, from Kaltunk through Report to
+Sen'jin Village, before Report to Orgnil. Warlocks see their Vile Familiars route through Ruzan.
 
 The rules can't read. A dull quest with dramatic wording can score well, and a quiet but
 important one can be missed. If a tale is missing, shouldn't be there, or has a poor name,

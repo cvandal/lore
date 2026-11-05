@@ -10,7 +10,17 @@ Lore.questToChapter = {}  -- [questID] = chapter index within that story
 function Lore:LoadStories(faction)
     self.stories = self.storyData[faction]
     self.acts = self.actsByFaction[faction]
+    local _, _, classID = UnitClass("player")
     for _, story in ipairs(self.stories) do
+        for _, quest in ipairs(story.quests) do
+            for _, variant in ipairs(quest.variants or {}) do
+                if variant.classID == classID then
+                    for key, value in pairs(variant) do
+                        if key ~= "ids" and key ~= "classID" then quest[key] = value end
+                    end
+                end
+            end
+        end
         self.storiesById[story.id] = story
         for index, quest in ipairs(story.quests) do
             for _, questID in ipairs(quest.ids) do
