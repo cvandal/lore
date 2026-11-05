@@ -155,24 +155,25 @@ UI.RegisterTab({
                     UI.Refresh()
                 end)
                 UI.AddTooltip(row, { tale.name,
-                    tale.quests[item.progress.activeIndex].name, "Click to follow this tale." })
+                    tale.quests[item.progress.activeIndex or item.progress.nextIndex].name, "Click to follow this tale." })
             end
             L:Divider()
         end
 
         local story, progress = selected.story, selected.progress
-        local chapter = progress.activeIndex
+        local chapter = progress.activeIndex or progress.nextIndex
         L:Text(("Chapter %s of %s"):format(UI.Roman(chapter), UI.Roman(#story.quests)),
             { font = "title", size = 13, color = "accent", justify = "CENTER", gap = 2 })
         L:Text(story.name, { font = "title", size = 20, justify = "CENTER", gap = 2 })
         L:Text(("%s - levels %d-%d"):format(story.zone, story.minLevel, story.maxLevel),
             { size = 11, color = "faded", justify = "CENTER", gap = 8 })
         L:Divider()
-        UI.ChapterList(L, story, progress, progress.activeIndex)
+        UI.ChapterList(L, story, progress, chapter)
 
         local after = {}
         for _, suggestion in ipairs(Lore:SuggestStories(#Lore.myStories)) do
-            if not Lore:GetStoryProgress(suggestion).activeIndex and #after < 2 then
+            local suggestedProgress = Lore:GetStoryProgress(suggestion)
+            if not suggestedProgress.activeIndex and suggestedProgress.done == 0 and #after < 2 then
                 after[#after + 1] = suggestion
             end
         end

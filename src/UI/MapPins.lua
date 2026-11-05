@@ -137,7 +137,9 @@ end
 
 -- The game marks quests in the log. Do not advertise later chapters while one is active.
 local function AutomaticPins(self)
-    if #self:GetCurrentStories() > 0 then return end
+    for _, current in ipairs(self:GetCurrentStories()) do
+        if current.progress.activeIndex then return end
+    end
     for _, suggestion in ipairs(self:SuggestStories(SUGGESTION_PINS)) do
         local first = self:GetStoryProgress(suggestion)
         for i, state in ipairs(first.states) do

@@ -136,6 +136,43 @@ do
     LOG, DONE[775], ns.db.journal.q752 = savedLog, savedDone, savedEntry
 end
 
+-- A completed opening keeps the Prodigal Lich current between quests and reloads.
+do
+    local savedLog = LOG
+    local lich = ns.questToStory[358]
+    local savedDone, savedCompletion = DONE[358], ns.db.completedQuests[358]
+    LOG = { 823 }
+    DONE[358] = true
+    local current = ns:GetCurrentStories()
+    assert(#current == 2, "Ak'Zeloth and the partially completed Lich are current")
+    local progress = ns:GetStoryProgress(lich)
+    assert(not progress.activeIndex and progress.nextIndex == 2, "chapter II is next without an active quest")
+    ns.UI.ShowTab("current")
+    local lichRow
+    for i, item in ipairs(current) do
+        if item.story == lich then lichRow = i end
+    end
+    ns.UI.rowPool.used[lichRow]:GetScript("OnClick")()
+    local chapterVisible = false
+    for _, fs in ipairs(ns.UI.textPool.used) do
+        if fs._text == "The Prodigal Lich" then chapterVisible = true end
+    end
+    assert(chapterVisible, "the next chapter is expanded between quests")
+    DONE[358] = nil
+    ns:QUEST_TURNED_IN(358)
+    local slash = SlashCmdList.LORE
+    local reloaded = LoadAddon()
+    reloaded:ADDON_LOADED("Lore")
+    reloaded:LoadStories("Horde")
+    reloaded:BuildMyStories()
+    assert(#reloaded:GetCurrentStories() == 2, "started tales remain current after reloading saved turn-ins")
+    _G.Lore, SlashCmdList.LORE = ns, slash
+    DONE[358], ns.db.completedQuests[358] = savedDone, savedCompletion
+    LOG = savedLog
+    ns.UI.Refresh()
+    ns.UI.frame:Hide()
+end
+
 -- Suggestions use current zone and level, including visits to another starting zone.
 do
     local oldLevel, oldZone, oldStories = UnitLevel, GetRealZoneText, ns.myStories

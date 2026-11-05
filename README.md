@@ -21,7 +21,8 @@ Lore runs on the **WoW Forever** client and covers vanilla (Classic Era) content
 Lore is a leather-bound book with four bookmarks, bound in your faction's colours: red on
 brown leather for the Horde, blue on navy for the Alliance.
 
-- **Current Tales** follows all the stories you're on, picked up from your quest log. Every
+- **Current Tales** follows stories with a quest in your log or a completed chapter,
+  keeping unfinished tales visible between quests and opening their next chapter. Every
   active tale is named in a switcher at the top; choose one to read its chapters. Each
   chapter is listed in order, with Blizzard's quest text, the objective, who gives it and a
   button to show it on the map.

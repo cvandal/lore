@@ -146,7 +146,7 @@ local function IsChapterInLog(quest, inLog)
     return false
 end
 
--- Returns { states = { "done" | "active" | "next" | "upcoming", ... }, done, activeIndex }
+-- activeIndex is a quest in the log; nextIndex is the first unfinished chapter.
 function Lore:GetStoryProgress(story, inLog)
     inLog = inLog or GetQuestLogIDs()
     local progress = { states = {}, done = 0 }
@@ -159,6 +159,9 @@ function Lore:GetStoryProgress(story, inLog)
             progress.activeIndex = progress.activeIndex or i
         else
             progress.states[i] = "upcoming"
+        end
+        if progress.states[i] ~= "done" then
+            progress.nextIndex = progress.nextIndex or i
         end
     end
     if not progress.activeIndex then
@@ -181,14 +184,14 @@ function Lore:IsStoryComplete(story)
     return IsChapterDone(story.quests[#story.quests])
 end
 
--- All unfinished tales with a quest in the log, ordered by importance and progress.
+-- Keep started tales current between quests, ordered by importance and progress.
 function Lore:GetCurrentStories()
     local inLog = GetQuestLogIDs()
     local list = {}
     for _, story in ipairs(self.myStories) do
         if not self:IsStoryComplete(story) then
             local progress = self:GetStoryProgress(story, inLog)
-            if progress.activeIndex then
+            if progress.activeIndex or progress.done > 0 then
                 list[#list + 1] = { story = story, progress = progress }
             end
         end
