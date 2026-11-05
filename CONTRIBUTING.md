@@ -20,6 +20,16 @@ It runs Retail-style UI on Classic map data, which explains most of the client n
 
 ## Making a release
 
+Lore is still pre-1.0. Choose the version bump by the biggest change in the release:
+
+- **Patch** (`0.6.2 → 0.6.3`): bug fixes, small polish, and data corrections.
+- **Minor** (`0.6.x → 0.7.0`): new features or substantial changes to existing behavior.
+- **Major** (`1.0.0`): a deliberate milestone when Lore is considered mature and stable
+  enough, rather than a bump triggered by routine changes.
+
+Bump once per release, not once per commit. For example, fixing a completed chapter's
+map pin staying visible is a patch release.
+
 1. Bump the version in both `src/Lore.toc` (`## Version`) and `src/Core.lua`
    (`Lore.version`), and push or merge the commit to `main`.
 2. The **Publish to CurseForge** GitHub Actions workflow detects the version change,
@@ -102,7 +112,8 @@ behaviour: quest text formatting, journal detection, map pins, the minimap butto
 Settings tab, story messages, story pages, quest badges and the quest log tooltip. It
 catches Lua errors and logic bugs, not layout problems, so check changes in game too.
 Regression checks cover the active tale count, switching tales, selection fallback, suppression of future chapter
-pins while tales are active, manual map selections, and persisted chapter turn-ins across addon reloads.
+pins while tales are active, clearing manual map selections on acceptance or completion,
+and persisted chapter turn-ins across addon reloads.
 Suggestion checks cover an empty starting zone, local level progression, visits to another
 starting zone, and expansion to other zones at level 10. Suggestion ranking uses zone and
 level without additional race or class preferences; eligibility filtering remains separate.

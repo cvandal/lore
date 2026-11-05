@@ -238,6 +238,23 @@ assert(ns:ShowOnMap(tale, 7) == "game" and #PINS == 0, "a chapter in the log get
 assert(ns:ShowOnMap(tale, 8) == "marked" and #PINS == 2, "explicitly requesting a future chapter adds its pin")
 assert(ns:ShowOnMap(tale, #tale.quests) == "marked" and #PINS == 2, "any other chapter gets a pin")
 print("marked map:", WorldMapFrame._map, "pins now", #PINS)
+-- A manual chapter pin must disappear as the player advances, including when the
+-- completion flag arrives without an intervening refresh while it was in the log.
+local scarlet = ns.storiesById.q381
+ns:ShowOnMap(scarlet, 2)
+LOG = { 383 } -- Vital Intelligence
+ns.db.completedQuests[380] = true
+ns:RefreshPins()
+assert(ns.marked == nil and #PINS == 0, "completed Night Web's Hollow clears both map pins")
+ns.db.completedQuests[380] = nil
+ns:ShowOnMap(scarlet, 2)
+LOG = { 380 }
+ns:QUEST_LOG_UPDATE()
+assert(ns.marked == nil and #PINS == 0, "accepting a marked chapter clears its selection")
+LOG = { 383 }
+ns:RefreshPins()
+assert(#PINS == 0, "an old manual pin cannot return after leaving the quest log")
+LOG = { 806 }
 SlashCmdList.LORE("pins")
 assert(#PINS == 0, "pins off should clear them")
 SlashCmdList.LORE("pins")

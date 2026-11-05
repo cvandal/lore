@@ -152,11 +152,20 @@ end
 function Lore:RefreshPins()
     ReleaseAll()
     wipe(pinned)
+    -- Retire a manual selection once play advances past it. Clear it on acceptance too,
+    -- so abandoning or completing the quest cannot bring the old pin back.
+    local marked = self.marked and self.storiesById[self.marked.storyID]
+    if marked then
+        local state = self:GetStoryProgress(marked).states[self.marked.index]
+        if state == "active" or (state == "done" and self.marked.state ~= "done") then
+            self.marked = nil
+            marked = nil
+        end
+    end
     if not (self.db and self.db.settings.pins and self.faction) then return end
     AutomaticPins(self)
 
     -- The chapter the player asked to see, unless it's now in the log (the game marks it).
-    local marked = self.marked and self.storiesById[self.marked.storyID]
     if marked and not pinned[marked.id .. ":" .. self.marked.index] then
         local state = self:GetStoryProgress(marked).states[self.marked.index]
         if state ~= "active" then
@@ -201,7 +210,7 @@ function Lore:ShowOnMap(story, index)
         if pinned[story.id .. ":" .. index] then
             how = "pinned"   -- already has a Lore pin (a suggestion or a manual selection)
         else
-            self.marked = { storyID = story.id, index = index }
+            self.marked = { storyID = story.id, index = index, state = state }
             self:RefreshPins()
             how = "marked"
         end

@@ -42,7 +42,8 @@ Around the game world it also:
 
 - Pins suggested tales on the world map when no tale is active. While a story quest is in
   your log, Lore leaves its markers to the game and keeps future chapters off the map.
-  You can still pin a chapter explicitly with **Show on the map**.
+  You can still pin a chapter explicitly with **Show on the map**. That selection clears
+  when you accept or complete the chapter.
 - Puts a small Lore badge on story quests in an NPC's quest list, and a tag beside the quest
   window naming the tale and chapter.
 - Adds the tale and chapter to a story quest's tooltip in the quest log.
