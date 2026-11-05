@@ -30,6 +30,11 @@ brown leather for the Horde, blue on navy for the Alliance.
 - **Journal** keeps the tales you've finished, with the date, your level and where you were.
 - **Settings** turns each feature on or off and lists every command.
 
+Below level 10, suggested tales stay in your current zone. If none fit yet, Lore shows
+local guidance. From level 10, suggestions include other zones, with your current zone
+first. This ranking uses zone and level, with no extra race or class preference; quest
+eligibility still applies. The Chronicle remains available for exploring every eligible tale.
+
 Around the game world it also:
 
 - Pins where your tale's next chapter starts on the world map and minimap. It never pins

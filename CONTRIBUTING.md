@@ -70,6 +70,9 @@ orc warrior with "Report to Orgnil" in the log), renders every tab and checks th
 behaviour: quest text formatting, journal detection, map pins, the minimap button, the
 Settings tab, story messages, story pages, quest badges and the quest log tooltip. It
 catches Lua errors and logic bugs, not layout problems, so check changes in game too.
+Suggestion checks cover an empty starting zone, local level progression, visits to another
+starting zone, and expansion to other zones at level 10. Suggestion ranking uses zone and
+level without additional race or class preferences; eligibility filtering remains separate.
 It then logs in again as a human paladin to check the Alliance gets its own tales, acts and
 colours, and once more with no faction to check Lore stays out of the way.
 

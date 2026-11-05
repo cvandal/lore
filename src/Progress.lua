@@ -204,12 +204,14 @@ function Lore:FitsPlayer(story)
     return level >= story.minLevel - 2 and level <= story.maxLevel
 end
 
--- Unfinished stories that fit the player's level, nearby ones first.
+-- Early adventures stay in the current zone; later tales can lead farther afield.
 function Lore:SuggestStories(limit, excludeID)
     local zone = GetRealZoneText()
     local list = {}
+    local localOnly = self:PlayerLevel() < 10
     for _, story in ipairs(self.myStories) do
-        if story.id ~= excludeID and self:FitsPlayer(story) and not self:IsStoryComplete(story) then
+        if (not localOnly or story.zone == zone) and story.id ~= excludeID
+            and self:FitsPlayer(story) and not self:IsStoryComplete(story) then
             list[#list + 1] = story
         end
     end
@@ -221,6 +223,23 @@ function Lore:SuggestStories(limit, excludeID)
     end)
     while #list > limit do table.remove(list) end
     return list
+end
+
+-- Give new characters a useful next step when their zone has no suitable tale yet.
+function Lore:GetSuggestionGuidance()
+    local zone = GetRealZoneText()
+    local nextLevel
+    for _, story in ipairs(self.myStories) do
+        local level = math.max(1, story.minLevel - 2)
+        if story.zone == zone and level > self:PlayerLevel() and not self:IsStoryComplete(story) then
+            nextLevel = math.min(nextLevel or level, level)
+        end
+    end
+    if nextLevel then
+        return ("Continue your adventures in %s. Lore's next local tale fits your level from level %d.")
+            :format(zone, nextLevel)
+    end
+    return ("Continue your adventures in %s. Explore the Chronicle for tales in other zones."):format(zone)
 end
 
 -- Journal --------------------------------------------------------------------------

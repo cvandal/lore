@@ -109,7 +109,12 @@ local function RenderEmpty(L)
         { size = 13, justify = "CENTER", color = "faded", gap = 10 })
     L:Divider()
     L:Text("Tales for your level", { font = "title", size = 14, color = "accent", gap = 6 })
-    SuggestionRows(L, Lore:SuggestStories(6))
+    local suggestions = Lore:SuggestStories(6)
+    if #suggestions > 0 then
+        SuggestionRows(L, suggestions)
+    else
+        L:Text(Lore:GetSuggestionGuidance(), { size = 13, color = "faded", gap = 6 })
+    end
 end
 
 UI.RegisterTab({

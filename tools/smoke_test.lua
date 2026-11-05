@@ -97,6 +97,29 @@ ns:PLAYER_LOGIN()
 assert(ns.faction == "Horde" and ns.Theme.accentName == "Red", "a Horde character gets the Horde book")
 print(("stories: %d total, %d for an orc warrior"):format(#ns.stories, #ns.myStories))
 
+-- Suggestions use current zone and level, including visits to another starting zone.
+do
+    local oldLevel, oldZone, oldStories = UnitLevel, GetRealZoneText, ns.myStories
+    local savedDone, savedEntry = DONE[775], ns.db.journal.q752
+    DONE[775], ns.db.journal.q752 = nil, nil
+    local level, zone = 1, "Durotar"
+    UnitLevel = function() return level end
+    GetRealZoneText = function() return zone end
+    ns.myStories = { ns.storiesById.q823, ns.storiesById.q752 }
+    assert(#ns:SuggestStories(6) == 0, "a fresh Orc is not sent to Mulgore")
+    assert(ns:GetSuggestionGuidance():find("Durotar", 1, true), "empty suggestions explain where to adventure")
+    assert(ns:GetSuggestionGuidance():find("level 2", 1, true), "guidance uses the existing level allowance")
+    level = 4
+    assert(ns:SuggestStories(6)[1].id == "q823" and #ns:SuggestStories(6) == 1, "local tale appears as levels permit")
+    assert(#ns:SuggestStories(6, "q823") == 0, "excluded tales stay excluded")
+    zone, level = "Mulgore", 1
+    assert(ns:SuggestStories(6)[1].id == "q752", "visiting Mulgore offers its local tale regardless of race")
+    zone, level = "Durotar", 10
+    assert(#ns:SuggestStories(6) == 2 and ns:SuggestStories(6)[1].id == "q823", "later suggestions expand but prefer the current zone")
+    DONE[775], ns.db.journal.q752 = savedDone, savedEntry
+    UnitLevel, GetRealZoneText, ns.myStories = oldLevel, oldZone, oldStories
+end
+
 -- Build checks: required side quests are chapters, and eligibility covers every chapter.
 for _, s in ipairs(ns.stories) do
     for _, q in ipairs(s.quests) do
