@@ -97,6 +97,45 @@ ns:PLAYER_LOGIN()
 assert(ns.faction == "Horde" and ns.Theme.accentName == "Red", "a Horde character gets the Horde book")
 print(("stories: %d total, %d for an orc warrior"):format(#ns.stories, #ns.myStories))
 
+-- Multiple active tales remain visible, and chapter turn-ins survive addon reloads.
+do
+    local savedLog, savedDone, savedEntry = LOG, DONE[775], ns.db.journal.q752
+    DONE[775], ns.db.journal.q752 = nil, nil
+    LOG = { 823, 757 }
+    local current = ns:GetCurrentStories()
+    assert(#current == 2, "both Ak'Zeloth and Rites are current")
+    ns.UI.ShowTab("current")
+    local function HasText(text)
+        for _, fs in ipairs(ns.UI.textPool.used) do
+            if fs._text == text then return true end
+        end
+        return false
+    end
+    assert(HasText("2 tales underway"), "active tale count is visible above chapters")
+    assert(HasText("Ak'Zeloth") and HasText("Rites of the Earthmother"), "both tales are named in the switcher")
+    ns.UI.rowPool.used[2]:GetScript("OnClick")()
+    assert(HasText(current[2].story.quests[current[2].progress.activeIndex].name), "switching shows the other tale's chapter")
+    LOG = { current[1].story.quests[current[1].progress.activeIndex].ids[1] }
+    ns.UI.Refresh()
+    assert(HasText(current[1].story.name), "selection falls back when the selected tale leaves the log")
+    LOG = { 823, 757 }
+    ns.UI.Refresh()
+    ns.UI.frame:Hide()
+    ns:RefreshPins()
+    assert(#PINS == 0, "multiple active tales do not expose future chapter pins")
+    ns:QUEST_TURNED_IN(823)
+    assert(ns.db.completedQuests[823], "Report to Orgnil is saved per character")
+    assert(not ns:GetJournalEntry("q823"), "one chapter does not finish Ak'Zeloth")
+    local slash = SlashCmdList.LORE
+    local reloaded = LoadAddon()
+    reloaded:ADDON_LOADED("Lore")
+    assert(reloaded:IsQuestDone(823), "saved turn-ins survive a fresh addon instance")
+    _G.Lore = ns
+    SlashCmdList.LORE = slash
+    ns.db.completedQuests[823] = nil
+    LOG, DONE[775], ns.db.journal.q752 = savedLog, savedDone, savedEntry
+end
+
 -- Suggestions use current zone and level, including visits to another starting zone.
 do
     local oldLevel, oldZone, oldStories = UnitLevel, GetRealZoneText, ns.myStories
@@ -177,19 +216,24 @@ print("suggestion pins:", #PINS)
 for _, p in ipairs(PINS) do assert(p.x > 0 and p.x <= 1 and p.y > 0 and p.y <= 1, "pin coords must be 0-1") end
 
 -- Dark Storms (806) in the log, its first step done: the game marks Dark Storms itself, so
--- Lore pins only where the next chapter (Margoz) starts - on the world map and minimap.
+-- Lore must not pin the future chapter (Margoz) on either map.
 LOG, DONE[823] = { 806 }, true
 ns:RefreshPins()
 for _, p in ipairs(PINS) do print("pin:", p.kind, p.map, p.x, p.y, p.info and (p.info.title .. " / " .. p.info.action)) end
-assert(#PINS == 2, "one world + one minimap pin for the next chapter")
-assert(PINS[1].info.title == "Margoz", "the pin is the next chapter, not the one in the log")
+assert(#PINS == 0, "Dark Storms in the log suppresses automatic future chapter pins")
+LOG, DONE[806] = {}, true
+ns:RefreshPins()
+assert(#PINS > 0, "recommendation pins return when no tale is active")
+LOG, DONE[806] = { 806 }, nil
+ns:RefreshPins()
+assert(#PINS == 0, "resuming a tale clears recommendation pins")
 
 -- Show on the map: only adds a pin where the map has none. Dark Storms is in the log (the
--- game marks it) and Margoz already has a pin; the last chapter gets a new one.
+-- game marks it); a future chapter is pinned only when explicitly requested.
 local tale = ns:GetCurrentStory()
-assert(ns:ShowOnMap(tale, 2) == "game" and #PINS == 2, "a chapter in the log gets no Lore pin")
-assert(ns:ShowOnMap(tale, 3) == "pinned" and #PINS == 2, "the next chapter is already pinned")
-assert(ns:ShowOnMap(tale, #tale.quests) == "marked" and #PINS == 4, "any other chapter gets a pin")
+assert(ns:ShowOnMap(tale, 2) == "game" and #PINS == 0, "a chapter in the log gets no Lore pin")
+assert(ns:ShowOnMap(tale, 3) == "marked" and #PINS == 2, "explicitly requesting a future chapter adds its pin")
+assert(ns:ShowOnMap(tale, #tale.quests) == "marked" and #PINS == 2, "any other chapter gets a pin")
 print("marked map:", WorldMapFrame._map, "pins now", #PINS)
 SlashCmdList.LORE("pins")
 assert(#PINS == 0, "pins off should clear them")

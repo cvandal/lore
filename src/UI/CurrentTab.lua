@@ -8,6 +8,7 @@ local ZONE_W = 96
 
 -- Chapters the player opened by hand. The active chapter is always open.
 local opened = {}
+local selectedStoryID
 
 local STATE_ICON = {
     done = Theme.textures.check,
@@ -120,30 +121,65 @@ end
 UI.RegisterTab({
     key = "current",
     order = 1,
-    title = "Current Tale",
+    title = "Current Tales",
     icon = Theme.tabIcons.current,
     Render = function(L)
-        local story, progress = Lore:GetCurrentStory()
-        if not story then
+        local current = Lore:GetCurrentStories()
+        if #current == 0 then
             RenderEmpty(L)
             return
         end
 
-        local chapter = progress.activeIndex or (progress.done + 1)
+        local selected = current[1]
+        for _, item in ipairs(current) do
+            if item.story.id == selectedStoryID then selected = item end
+        end
+        selectedStoryID = selected.story.id
+
+        if #current > 1 then
+            L:Text(("%d tales underway"):format(#current),
+                { font = "title", size = 20, justify = "CENTER", gap = 6 })
+            for _, item in ipairs(current) do
+                local tale = item.story
+                local isSelected = tale.id == selectedStoryID
+                local row = L:Row(24, 2)
+                UI.RowIcon(row, Theme.textures.activeQuest, 14, 0)
+                UI.RowText(row, tale.name, { x = 22, width = L.width - 96,
+                    font = isSelected and "title" or "body", size = 14,
+                    color = isSelected and "accent" or "ink" })
+                UI.RowText(row, isSelected and "Reading" or "Read tale", { anchor = "RIGHT",
+                    width = 70, justify = "RIGHT", size = 11, color = "faded" })
+                row:SetScript("OnClick", function()
+                    selectedStoryID = tale.id
+                    UI.frame.scroll:SetVerticalScroll(0)
+                    UI.Refresh()
+                end)
+                UI.AddTooltip(row, { tale.name,
+                    tale.quests[item.progress.activeIndex].name, "Click to follow this tale." })
+            end
+            L:Divider()
+        end
+
+        local story, progress = selected.story, selected.progress
+        local chapter = progress.activeIndex
         L:Text(("Chapter %s of %s"):format(UI.Roman(chapter), UI.Roman(#story.quests)),
             { font = "title", size = 13, color = "accent", justify = "CENTER", gap = 2 })
         L:Text(story.name, { font = "title", size = 20, justify = "CENTER", gap = 2 })
         L:Text(("%s - levels %d-%d"):format(story.zone, story.minLevel, story.maxLevel),
             { size = 11, color = "faded", justify = "CENTER", gap = 8 })
         L:Divider()
-
         UI.ChapterList(L, story, progress, progress.activeIndex)
 
-        local after = Lore:SuggestStories(2, story.id)
+        local after = {}
+        for _, suggestion in ipairs(Lore:SuggestStories(#Lore.myStories)) do
+            if not Lore:GetStoryProgress(suggestion).activeIndex and #after < 2 then
+                after[#after + 1] = suggestion
+            end
+        end
         if #after > 0 then
             L:Space(8)
             L:Divider()
-            L:Text("When this tale ends", { font = "title", size = 14, color = "accent", gap = 6 })
+            L:Text("More tales for your level", { font = "title", size = 14, color = "accent", gap = 6 })
             SuggestionRows(L, after)
         end
     end,

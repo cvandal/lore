@@ -84,10 +84,8 @@ end
 
 -- Quest state ------------------------------------------------------------------
 
-local turnedInThisSession = {}
-
 local function IsQuestIDCompleted(questID)
-    if turnedInThisSession[questID] then return true end
+    if Lore.db and Lore.db.completedQuests[questID] then return true end
     if C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted then
         return C_QuestLog.IsQuestFlaggedCompleted(questID)
     end
@@ -173,24 +171,32 @@ function Lore:IsStoryComplete(story)
     return IsChapterDone(story.quests[#story.quests])
 end
 
--- The current story is whichever unfinished story has a quest in the log.
--- Ties go to the more important story, then the one further along.
-function Lore:GetCurrentStory()
+-- All unfinished tales with a quest in the log, ordered by importance and progress.
+function Lore:GetCurrentStories()
     local inLog = GetQuestLogIDs()
-    local best, bestProgress
+    local list = {}
     for _, story in ipairs(self.myStories) do
         if not self:IsStoryComplete(story) then
             local progress = self:GetStoryProgress(story, inLog)
             if progress.activeIndex then
-                if not best
-                    or story.importance > best.importance
-                    or (story.importance == best.importance and progress.done > bestProgress.done) then
-                    best, bestProgress = story, progress
-                end
+                list[#list + 1] = { story = story, progress = progress }
             end
         end
     end
-    return best, bestProgress
+    table.sort(list, function(a, b)
+        if a.story.importance ~= b.story.importance then
+            return a.story.importance > b.story.importance
+        end
+        if a.progress.done ~= b.progress.done then return a.progress.done > b.progress.done end
+        return a.story.id < b.story.id
+    end)
+    return list
+end
+
+-- Keep the primary tale available to callers that need a single story.
+function Lore:GetCurrentStory()
+    local current = self:GetCurrentStories()[1]
+    if current then return current.story, current.progress end
 end
 
 -- Suggestions --------------------------------------------------------------------
@@ -284,7 +290,7 @@ function Lore:OnQuestAccepted(questID)
 end
 
 function Lore:OnQuestTurnedIn(questID)
-    turnedInThisSession[questID] = true
+    if self.questToStory[questID] then self.db.completedQuests[questID] = true end
     local story, index = self:GetChapter(questID)
     if not story then return end
     if self:IsStoryComplete(story) then

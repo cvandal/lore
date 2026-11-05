@@ -5,6 +5,7 @@ Lore.version = "0.5.0"
 Lore.storyData = {}  -- [faction] = stories, filled by Data/<Faction>Stories.lua
 
 local defaults = {
+    completedQuests = {}, -- observed story quest turn-ins, retained across reloads
     journal = {},   -- [storyId] = { completedAt, level, zone } or { preLore = true }
     settings = {
         point = nil,
@@ -132,7 +133,7 @@ Lore.options = {
     {
         command = "pins",
         label = "Map pins",
-        description = "Pins on the world map and minimap for your tale's next chapter, or for tales to start when you're between tales.",
+        description = "Suggested tales on the world map when you're between tales, plus chapters you choose with Show on the map.",
         get = function() return settings().pins end,
         set = function(on)
             settings().pins = on

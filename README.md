@@ -21,13 +21,16 @@ Lore runs on the **WoW Forever** client and covers vanilla (Classic Era) content
 Lore is a leather-bound book with four bookmarks, bound in your faction's colours: red on
 brown leather for the Horde, blue on navy for the Alliance.
 
-- **Current Tale** follows the story you're on, picked up from your quest log. Every
+- **Current Tales** follows all the stories you're on, picked up from your quest log. Every
+  active tale is named in a switcher at the top; choose one to read its chapters. Each
   chapter is listed in order, with Blizzard's quest text, the objective, who gives it and a
   button to show it on the map.
 - **Chronicle** lists every tale your race and class can do, grouped into three acts by
   level. Tales that fit your level are highlighted. Click one to read it and see where it
   starts.
 - **Journal** keeps the tales you've finished, with the date, your level and where you were.
+  Individual chapters such as Report to Orgnil count toward their tale; they do not create
+  separate journal entries. Story quest turn-ins are saved across reloads.
 - **Settings** turns each feature on or off and lists every command.
 
 Below level 10, suggested tales stay in your current zone. If none fit yet, Lore shows
@@ -37,8 +40,9 @@ eligibility still applies. The Chronicle remains available for exploring every e
 
 Around the game world it also:
 
-- Pins where your tale's next chapter starts on the world map and minimap. It never pins
-  what the game already marks.
+- Pins suggested tales on the world map when no tale is active. While a story quest is in
+  your log, Lore leaves its markers to the game and keeps future chapters off the map.
+  You can still pin a chapter explicitly with **Show on the map**.
 - Puts a small Lore badge on story quests in an NPC's quest list, and a tag beside the quest
   window naming the tale and chapter.
 - Adds the tale and chapter to a story quest's tooltip in the quest log.

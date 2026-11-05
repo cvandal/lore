@@ -128,16 +128,6 @@ local function AddPin(story, quest, state, opts)
     end
 end
 
--- The first chapter after the one(s) in your log that you haven't started: the next step
--- the game knows nothing about.
-local function NextChapter(progress)
-    for i = (progress.activeIndex or 0) + 1, #progress.states do
-        if progress.states[i] == "upcoming" or progress.states[i] == "next" then
-            return i
-        end
-    end
-end
-
 local pinned = {}  -- ["storyID:index"] = true for each chapter with a Lore pin
 
 local function PinChapter(story, index, state, opts)
@@ -145,17 +135,9 @@ local function PinChapter(story, index, state, opts)
     pinned[story.id .. ":" .. index] = true
 end
 
--- Pins for the current tale's next chapter or, without one, the suggested tales.
+-- The game marks quests in the log. Do not advertise later chapters while one is active.
 local function AutomaticPins(self)
-    local story, progress = self:GetCurrentStory()
-    if story then
-        local index = NextChapter(progress)
-        if index then
-            PinChapter(story, index, progress.states[index],
-                { minimap = true, withObjective = true, showFlag = HBD_PINS_WORLDMAP_SHOW_PARENT })
-        end
-        return
-    end
+    if #self:GetCurrentStories() > 0 then return end
     for _, suggestion in ipairs(self:SuggestStories(SUGGESTION_PINS)) do
         local first = self:GetStoryProgress(suggestion)
         for i, state in ipairs(first.states) do
@@ -217,7 +199,7 @@ function Lore:ShowOnMap(story, index)
         self.db.settings.pins = true
         self:RefreshPins()
         if pinned[story.id .. ":" .. index] then
-            how = "pinned"   -- already has a Lore pin (the next chapter, or a suggestion)
+            how = "pinned"   -- already has a Lore pin (a suggestion or a manual selection)
         else
             self.marked = { storyID = story.id, index = index }
             self:RefreshPins()
