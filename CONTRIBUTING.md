@@ -34,7 +34,7 @@ It runs Retail-style UI on Classic map data, which explains most of the client n
 In the GitHub repository's **Settings → Secrets and variables → Actions**, add:
 
 - Secret `CF_API_TOKEN`: an API token from your CurseForge author account.
-- Variable `CF_PROJECT_ID`: the numeric ID of the existing CurseForge project.
+- Secret `CF_PROJECT_ID`: the numeric ID of the existing CurseForge project.
 
 The upload uses display name `Lore <version>`, game version `1.60.1`, release type
 **Release**, an empty changelog, and automatic publication after approval. The game

@@ -61,11 +61,11 @@ jobs:
         if: steps.version.outputs.publish == 'true'
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_PROJECT_ID: ${{ vars.CF_PROJECT_ID }}
+          CF_PROJECT_ID: ${{ secrets.CF_PROJECT_ID }}
           VERSION: ${{ steps.version.outputs.number }}
         run: |
           : "${CF_API_TOKEN:?Set the CF_API_TOKEN repository secret}"
-          : "${CF_PROJECT_ID:?Set the CF_PROJECT_ID repository variable}"
+          : "${CF_PROJECT_ID:?Set the CF_PROJECT_ID repository secret}"
           [[ "$CF_PROJECT_ID" =~ ^[0-9]+$ ]]
           metadata=$(jq -cn --arg name "Lore $VERSION" \
             '{displayName: $name, changelog: "", changelogType: "text", gameVersionNames: ["1.60.1"], releaseType: "release", isMarkedForManualRelease: false}')
