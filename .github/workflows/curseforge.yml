@@ -1,0 +1,77 @@
+name: Publish to CurseForge
+
+on:
+  push:
+    branches: [main]
+    paths: [src/Lore.toc]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: curseforge-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'cvandal/lore' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check version change
+        id: version
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          version=$(sed -n 's/^## Version: *//p' src/Lore.toc | tr -d '\r')
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo 'Expected a numeric x.y.z version in src/Lore.toc' >&2
+            exit 1
+          fi
+          echo "number=$version" >> "$GITHUB_OUTPUT"
+          if [[ -z "$BEFORE" || "$BEFORE" =~ ^0+$ ]]; then
+            echo 'No previous main revision to compare; skipping publication.'
+            echo 'publish=false' >> "$GITHUB_OUTPUT"
+          else
+            previous=$(git show "$BEFORE:src/Lore.toc" | sed -n 's/^## Version: *//p' | tr -d '\r')
+            echo "publish=$([[ "$version" != "$previous" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install Lua
+        if: steps.version.outputs.publish == 'true'
+        run: sudo apt-get update && sudo apt-get install -y lua5.1
+
+      - name: Test and package
+        if: steps.version.outputs.publish == 'true'
+        run: sh tools/package.sh
+
+      - name: Save release ZIP
+        if: steps.version.outputs.publish == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lore-${{ steps.version.outputs.number }}
+          path: dist/Lore-${{ steps.version.outputs.number }}.zip
+          if-no-files-found: error
+
+      - name: Upload to CurseForge
+        if: steps.version.outputs.publish == 'true'
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_PROJECT_ID: ${{ vars.CF_PROJECT_ID }}
+          VERSION: ${{ steps.version.outputs.number }}
+        run: |
+          : "${CF_API_TOKEN:?Set the CF_API_TOKEN repository secret}"
+          : "${CF_PROJECT_ID:?Set the CF_PROJECT_ID repository variable}"
+          [[ "$CF_PROJECT_ID" =~ ^[0-9]+$ ]]
+          metadata=$(jq -cn --arg name "Lore $VERSION" \
+            '{displayName: $name, changelog: "", changelogType: "text", gameVersionNames: ["1.60.1"], releaseType: "release", isMarkedForManualRelease: false}')
+          # Do not retry automatically: the server may have accepted an upload even if its response was lost.
+          curl --fail-with-body --silent --show-error \
+            -H "X-Api-Token: $CF_API_TOKEN" \
+            --form-string "metadata=$metadata" \
+            -F "file=@dist/Lore-$VERSION.zip" \
+            "https://wow.curseforge.com/api/projects/$CF_PROJECT_ID/upload-file"

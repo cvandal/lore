@@ -21,10 +21,41 @@ It runs Retail-style UI on Classic map data, which explains most of the client n
 ## Making a release
 
 1. Bump the version in both `src/Lore.toc` (`## Version`) and `src/Core.lua`
-   (`Lore.version`), and commit.
-2. Run `tools/package.sh`. It runs the smoke test, checks the two versions match, and
-   writes `dist/Lore-<version>.zip` with just the addon in a `Lore` folder.
-3. On GitHub, create a release with the tag `v<version>` and attach the ZIP.
+   (`Lore.version`), and push or merge the commit to `main`.
+2. The **Publish to CurseForge** GitHub Actions workflow detects the version change,
+   runs `tools/package.sh` (including the smoke test and matching-version check), saves
+   the ZIP as a workflow artifact, and uploads it to CurseForge as a release.
+3. For GitHub downloads, create a release with the tag `v<version>` and attach
+   `dist/Lore-<version>.zip` (run `sh tools/package.sh` locally, or download the ZIP
+   from the workflow artifact).
+
+### One-time CurseForge setup
+
+In the GitHub repository's **Settings → Secrets and variables → Actions**, add:
+
+- Secret `CF_API_TOKEN`: an API token from your CurseForge author account.
+- Variable `CF_PROJECT_ID`: the numeric ID of the existing CurseForge project.
+
+The upload uses display name `Lore <version>`, game version `1.60.1`, release type
+**Release**, an empty changelog, and automatic publication after approval. The game
+version is specified by name using the
+[CurseForge Upload API](https://support.curseforge.com/support/solutions/articles/9000197321-curseforge-api).
+Keep the API token in GitHub secrets, never in source control.
+
+The workflow runs when a push to `main` changes `src/Lore.toc`, but only packages and
+publishes if `## Version` differs from its value before that push. Other TOC edits skip
+publication. An initial push without a previous revision also skips publication.
+To retry a failed upload, rerun the failed workflow in Actions. Check CurseForge first
+if a request failed after sending the ZIP, since a rerun can create a duplicate file.
+Uploads still follow CurseForge's approval process. This workflow does not create
+GitHub releases.
+
+Publishing is restricted to pushes to `main` in `cvandal/lore`; the job skips forks
+and does not run on pull requests. GitHub secrets are not copied into forks. The
+CurseForge token is passed only to the upload step, and checkout does not persist
+GitHub credentials. Review changes to workflows, packaging scripts, and addon code
+before merging: code merged into `main` becomes trusted release code. Protect `main`
+with a branch rule or ruleset to restrict who can change it.
 
 Players install from that ZIP. GitHub's own "Source code" archives contain the whole repo,
 with the addon in `src`, so they aren't what players want.
