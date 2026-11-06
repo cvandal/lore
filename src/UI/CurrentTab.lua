@@ -8,7 +8,6 @@ local ZONE_W = 96
 
 -- Chapters the player opened by hand. The active chapter is always open.
 local opened = {}
-local selectedStoryID
 
 local STATE_ICON = {
     done = Theme.textures.check,
@@ -130,11 +129,13 @@ UI.RegisterTab({
             return
         end
 
+        local selectedStoryID = Lore.db.currentStoryID
         local selected = current[1]
         for _, item in ipairs(current) do
             if item.story.id == selectedStoryID then selected = item end
         end
         selectedStoryID = selected.story.id
+        Lore.db.currentStoryID = selectedStoryID
 
         if #current > 1 then
             L:Text(("%d tales underway"):format(#current),
@@ -150,7 +151,7 @@ UI.RegisterTab({
                 UI.RowText(row, isSelected and "Reading" or "Read tale", { anchor = "RIGHT",
                     width = 70, justify = "RIGHT", size = 11, color = "faded" })
                 row:SetScript("OnClick", function()
-                    selectedStoryID = tale.id
+                    Lore.db.currentStoryID = tale.id
                     UI.frame.scroll:SetVerticalScroll(0)
                     UI.Refresh()
                 end)

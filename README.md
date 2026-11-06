@@ -23,7 +23,8 @@ brown leather for the Horde, blue on navy for the Alliance.
 
 - **Current Tales** follows stories with a quest in your log or a completed chapter,
   keeping unfinished tales visible between quests and opening their next chapter. Every
-  active tale is named in a switcher at the top; choose one to read its chapters. Each
+  active tale is named in a switcher at the top; choose one to read its chapters. Lore remembers your selection per character across
+  reloads and logins. Each
   chapter is listed in order, with Blizzard's quest text, the objective, who gives it and a
   button to show it on the map.
 - **Chronicle** lists every tale your race and class can do, grouped into three acts by

@@ -115,9 +115,33 @@ do
     assert(HasText("Ak'Zeloth") and HasText("Rites of the Earthmother"), "both tales are named in the switcher")
     ns.UI.rowPool.used[2]:GetScript("OnClick")()
     assert(HasText(current[2].story.quests[current[2].progress.activeIndex].name), "switching shows the other tale's chapter")
+    assert(ns.db.currentStoryID == current[2].story.id, "the selected tale is saved per character")
+    ns.UI.Toggle()
+    ns.UI.Toggle()
+    assert(HasText(current[2].story.quests[current[2].progress.activeIndex].name), "reopening keeps the selected tale")
+    local slash = SlashCmdList.LORE
+    local savedFrame, savedScroll, savedMinimap = LoreFrame, LoreScrollFrame, LoreMinimapButton
+    local restored = LoadAddon()
+    restored:ADDON_LOADED("Lore")
+    restored:PLAYER_LOGIN()
+    restored.UI.ShowTab("current")
+    local restoredChapter = false
+    for _, fs in ipairs(restored.UI.textPool.used) do
+        if fs._text == current[2].story.quests[current[2].progress.activeIndex].name then
+            restoredChapter = true
+        end
+    end
+    assert(restoredChapter, "a fresh addon instance restores the selected tale's chapter")
+    restored.UI.frame:Hide()
+    LoreFrame, LoreScrollFrame, LoreMinimapButton = savedFrame, savedScroll, savedMinimap
+    _G.Lore, SlashCmdList.LORE = ns, slash
     LOG = { current[1].story.quests[current[1].progress.activeIndex].ids[1] }
+    local savedOpening = DONE[753]
+    DONE[753] = nil  -- Rites must have no completed chapters to stop being current.
     ns.UI.Refresh()
     assert(HasText(current[1].story.name), "selection falls back when the selected tale leaves the log")
+    assert(ns.db.currentStoryID == current[1].story.id, "the fallback selection replaces the unavailable tale")
+    DONE[753] = savedOpening
     LOG = { 823, 757 }
     ns.UI.Refresh()
     ns.UI.frame:Hide()

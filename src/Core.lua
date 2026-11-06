@@ -1,7 +1,7 @@
 local ADDON_NAME, Lore = ...
 _G.Lore = Lore
 
-Lore.version = "0.6.4"
+Lore.version = "0.6.5"
 Lore.storyData = {}  -- [faction] = stories, filled by Data/<Faction>Stories.lua
 
 local defaults = {
