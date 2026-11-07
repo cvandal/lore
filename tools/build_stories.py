@@ -594,18 +594,22 @@ class Assembler:
         return {}
 
     def level_range(self, members):
-        lows, highs = [], []
+        """(low, high, available): quest levels give the range a player should be; the
+        lowest required level is when the tale can first be picked up."""
+        lows, highs, required = [], [], []
         for m in members:
             q = self.q[m]
             level = q.get("5") or 0
-            required = q.get("4") or 0
+            req = q.get("4") or 0
             if level > 0:
                 highs.append(level)
-            if required > 0 or level > 0:
-                lows.append(required or level)
+            if req > 0 or level > 0:
+                lows.append(level or req)
+                required.append(req or level)
         low = max(1, min(lows) if lows else 1)
         high = min(60, max(highs) if highs else low)
-        return low, max(low, high)
+        available = max(1, min(min(required) if required else low, low))
+        return low, max(low, high), available
 
     def story_name(self, members):
         """Best title in the chain: a high-scoring quest that isn't an errand, a delivery or
@@ -670,7 +674,7 @@ class Assembler:
     def story(self, raw):
         members = topo_order(set(raw["path"] + raw["extra"]), self.scorer.succ, self.scorer.pred)
         quest_scores = [self.scores[m][0] for m in members]
-        low, high = self.level_range(members)
+        low, high, available = self.level_range(members)
         instance_kinds = {self.scorer.instance_of(m, self.q[m]) for m in members} - {None}
         races, classes = self.eligibility(members)
         if races is None or classes is None:
@@ -719,6 +723,7 @@ class Assembler:
             "zone": entries[0]["zone"],
             "minLevel": low,
             "maxLevel": high,
+            "availableLevel": available,
             "kind": kind,
             "races": mask_to_ids(races) if races else [],
             "classes": mask_to_ids(classes) if classes else [],
@@ -733,7 +738,8 @@ def select(stories):
     chosen = []
     general = [s for s in stories if s["kind"] != "class"]
     for bracket in range(6):
-        pool = sorted((s for s in general if min(5, (s["minLevel"] - 1) // 10) == bracket),
+        # Bracketed by when a tale opens up, so the kept set doesn't depend on the shown range.
+        pool = sorted((s for s in general if min(5, (s["availableLevel"] - 1) // 10) == bracket),
                       key=lambda s: s["score"], reverse=True)
         keep = [s for i, s in enumerate(pool)
                 if s["score"] >= MIN_SCORE and (i < BRACKET_QUOTA or s["score"] >= ALWAYS_KEEP)]
@@ -765,7 +771,7 @@ def add_story_prologues(stories, assembler):
         variant["classID"] = 9  # Warlock; the book chooses this chapter's text and giver.
         familiars["variants"] = [variant]
         story["quests"] = opening + story["quests"]
-        story["minLevel"] = 1
+        story["minLevel"] = story["availableLevel"] = 1
         story["zone"] = opening[0]["zone"]
 
 
@@ -818,7 +824,7 @@ def write_lua(stories, path, faction_name):
         "",
         f"Lore.storyData.{faction_name} = {{",
     ]
-    story_keys = ["id", "name", "zone", "minLevel", "maxLevel", "importance", "kind", "races", "classes"]
+    story_keys = ["id", "name", "zone", "minLevel", "maxLevel", "availableLevel", "importance", "kind", "races", "classes"]
     quest_keys = ["ids", "name", "level", "zone", "giver", "giverMap", "giverX", "giverY", "giverInside",
                   "ender", "enderMap", "enderX", "enderY", "enderInside", "after", "objective", "summary", "variants"]
     for s in stories:

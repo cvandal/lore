@@ -48,7 +48,7 @@ local function StoryRow(L, story, current)
     UI.RowText(row, story.minLevel .. "-" .. story.maxLevel, { anchor = "RIGHT", width = LEVEL_W,
         justify = "RIGHT", wrap = false, size = 12, color = "faded" })
 
-    local lines = { story.name, story.zone .. " - levels " .. story.minLevel .. "-" .. story.maxLevel,
+    local lines = { story.name, story.zone .. " - " .. Lore:LevelText(story),
         IMPORTANCE[story.importance] .. ", " .. Lore:GetQuestCount(story) .. " quests" }
     if KIND[story.kind] then
         lines[#lines + 1] = KIND[story.kind]
@@ -132,7 +132,7 @@ local function RenderPreview(L, story)
 
     L:Text(kind, { font = "title", size = 13, color = "accent", justify = "CENTER", gap = 2 })
     L:Text(story.name, { font = "title", size = 20, justify = "CENTER", gap = 2 })
-    L:Text(("%s - levels %d-%d"):format(story.zone, story.minLevel, story.maxLevel),
+    L:Text(story.zone .. " - " .. Lore:LevelText(story),
         { size = 11, color = "faded", justify = "CENTER", gap = 6 })
     L:Text(Status(story, progress, current), { size = 13, justify = "CENTER", gap = 8 })
 

@@ -84,7 +84,7 @@ them either. When a chain opens with a quest steeped in lore, its follow-up erra
 same quest giver aren't treated as filler: they serve that story.
 
 **4. Keep the best.** A story's score is its chapters added up, plus a small bonus for
-length. Up to 16 stories are kept per 10 levels, so long level-60 raid chains can't crowd
+length. Up to 16 stories are kept per 10 levels (by the level a story opens up), so long level-60 raid chains can't crowd
 out the early game. Importance (minor, notable, major) is ranked within each level range.
 
 **5. Fill in what's required.** Every quest a kept story needs before you can accept one

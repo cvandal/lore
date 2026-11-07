@@ -218,6 +218,15 @@ function Lore:PlayerLevel()
     return UnitLevel("player")
 end
 
+-- "levels 17-18", plus when the first chapter can be picked up earlier than that.
+function Lore:LevelText(story)
+    local text = ("levels %d-%d"):format(story.minLevel, story.maxLevel)
+    if story.availableLevel and story.availableLevel < story.minLevel then
+        text = text .. (", available from %d"):format(story.availableLevel)
+    end
+    return text
+end
+
 function Lore:FitsPlayer(story)
     local level = self:PlayerLevel()
     return level >= story.minLevel - 2 and level <= story.maxLevel

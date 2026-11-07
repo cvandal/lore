@@ -166,7 +166,7 @@ UI.RegisterTab({
         L:Text(("Chapter %s of %s"):format(UI.Roman(chapter), UI.Roman(#story.quests)),
             { font = "title", size = 13, color = "accent", justify = "CENTER", gap = 2 })
         L:Text(story.name, { font = "title", size = 20, justify = "CENTER", gap = 2 })
-        L:Text(("%s - levels %d-%d"):format(story.zone, story.minLevel, story.maxLevel),
+        L:Text(story.zone .. " - " .. Lore:LevelText(story),
             { size = 11, color = "faded", justify = "CENTER", gap = 8 })
         L:Divider()
         UI.ChapterList(L, story, progress, chapter)

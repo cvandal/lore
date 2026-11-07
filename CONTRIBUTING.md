@@ -173,7 +173,8 @@ Each story has:
   (`add_prerequisites`), so a story's first chapter can come before the quest in its ID.
   The build stops if two stories share an ID or a quest (`check_unique`).
 - `name`, `zone`, `minLevel`, `maxLevel`, `importance` (1-3) and `kind` (world, dungeon,
-  raid or class).
+  raid or class). `minLevel`-`maxLevel` spans the chapters' quest levels; `availableLevel`
+  is the lowest required level, when the tale can first be picked up.
 - `races` / `classes`: lists of IDs rather than bitmasks, so the addon needs no bit library.
   They cover the whole story: a chapter's race or class versions combine, then every
   chapter must be doable. Empty means anyone.
