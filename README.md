@@ -9,7 +9,8 @@ quests of vanilla WoW. Skip the "kill 10 boars" filler and follow the tales that
 rise of the Burning Blade, Sylvanas's plague, the Defias Brotherhood, the road to Onyxia's
 lair.
 
-Lore runs on the **WoW Forever** client and covers vanilla (Classic Era) content only.
+Lore runs on the **WoW Forever** client and covers vanilla (Classic Era) tales, with a targeted Forever correction for the
+Wild Hearts chain: Wild Eyes and Return to Quinn (Again) precede Ivar the Foul.
 
 > **A vibe-coded experiment.** Lore was primarily built by describing what I wanted to an
 > AI coding assistant (Claude), then trying each step in game and giving feedback. I steered

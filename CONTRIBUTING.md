@@ -149,7 +149,12 @@ are constants at the top: `FACTIONS`, `LORE_FIGURES`, `LORE_WORDS`, `FACTION_LOR
 
 **Change rules, not stories.** Lore has no hand-picked stories. When a story comes out
 wrong, find the rule that caused it (`--report` shows every quest's score and why) and fix
-the rule. The one exception is names: `NAME_OVERRIDES` replaces a name the rule got wrong,
+the rule. Targeted Forever prerequisite corrections live in `add_forever_chapters`, applied after
+selection so existing tale IDs remain stable. Wild Hearts adds quests 91920 and 91921
+between Return to Quinn and Ivar the Foul; the smoke test checks their order and progression.
+This does not switch the rest of the catalogue to Forever data.
+
+The other exception is names: `NAME_OVERRIDES` replaces a name the rule got wrong,
 each with its reason, and should use one of the chain's own quest titles where possible.
 The build warns when two stories one character can see share a name, and when an override
 points at a story that's no longer kept.

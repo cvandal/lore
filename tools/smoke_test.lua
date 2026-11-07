@@ -238,6 +238,24 @@ for _, s in ipairs(ns.stories) do
         assert(s.races and #s.races == 1 and s.races[1] == 2, "Creature of the Void is Orc-only")
     end
 end
+-- Forever inserts two required chapters before Rane offers Ivar the Foul.
+do
+    local story = assert(ns.storiesById.q428)
+    local expected = { 428, 429, 430, 91920, 91921, 425 }
+    assert(#story.quests == #expected, "Wild Hearts includes both Forever chapters")
+    for i, id in ipairs(expected) do
+        assert(story.quests[i].ids[1] == id and ns.questToStory[id] == story,
+            "Wild Hearts preserves Forever quest order and tale identity")
+    end
+    local saved = {}
+    for _, id in ipairs(expected) do saved[id], DONE[id] = DONE[id], nil end
+    for i, id in ipairs(expected) do
+        assert(ns:GetStoryProgress(story).nextIndex == i, "Wild Hearts advances through every required chapter")
+        DONE[id] = true
+    end
+    assert(ns:GetStoryProgress(story).done == #expected, "Wild Hearts completes after Ivar")
+    for _, id in ipairs(expected) do DONE[id] = saved[id] end
+end
 -- Journal entries are keyed by story ID and each quest maps to one story, so both are unique.
 local seenStory, seenQuest = {}, {}
 for _, s in ipairs(ns.stories) do

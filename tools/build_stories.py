@@ -769,6 +769,29 @@ def add_story_prologues(stories, assembler):
         story["zone"] = opening[0]["zone"]
 
 
+def add_forever_chapters(stories, assembler):
+    """Targeted Forever prerequisite correction; keep Vanilla story selection and IDs.
+
+    Wild Hearts: https://www.wowhead.com/forever/quest=91920/wild-eyes
+    https://www.warcraftforever.wiki/wiki/Return_to_Quinn_%28Again%29
+    Ivar now requires the second potion, not the first Return to Quinn.
+    """
+    for story in stories:
+        if story["id"] != "q428":
+            continue
+        eyes = assembler.quest_entry("430")  # Quinn -> Renferrel, reversing the delivery.
+        potion = assembler.quest_entry("430")
+        for field in ("", "Map", "X", "Y", "Inside"):
+            eyes["giver" + field], eyes["ender" + field] = eyes.get("ender" + field), eyes.get("giver" + field)
+        eyes.update(ids=[91920], name="Wild Eyes",
+                    objective="Gather 3 murloc eyes and bring them to Apothecary Renferrel at the Sepulcher.",
+                    summary="The first potion has not helped Quinn. He asks you to bring murloc eyes from Lake Lordamere to Renferrel to try another remedy.")
+        potion.update(ids=[91921], name="Return to Quinn (Again)",
+                      summary="Renferrel has prepared another potion. Bring it to Quinn to help him recover.")
+        index = next(i for i, q in enumerate(story["quests"]) if 425 in q["ids"])
+        story["quests"][index:index] = [eyes, potion]
+
+
 # --- Lua output ------------------------------------------------------------------------
 
 def lua_value(value):
@@ -875,6 +898,7 @@ def build_faction(faction_name, data, zones, instances, report):
         rebuilt.append(story)
     chosen = sorted(rebuilt, key=lambda s: (s["minLevel"], -s["importance"], -s["score"]))
     add_story_prologues(chosen, assembler)
+    add_forever_chapters(chosen, assembler)
     check_unique(chosen)
     warn_duplicate_names(chosen)
     write_lua(chosen, out, faction_name)
