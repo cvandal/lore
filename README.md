@@ -9,8 +9,8 @@ quests of vanilla WoW. Skip the "kill 10 boars" filler and follow the tales that
 rise of the Burning Blade, Sylvanas's plague, the Defias Brotherhood, the road to Onyxia's
 lair.
 
-Lore runs on the **WoW Forever** client and covers vanilla (Classic Era) tales, with a targeted Forever correction for the
-Wild Hearts chain: Wild Eyes and Return to Quinn (Again) precede Ivar the Foul.
+Lore runs on the **WoW Forever** client and covers vanilla (Classic Era) tales, with targeted Forever additions: Wild Eyes and Return to Quinn (Again) precede Ivar the Foul,
+and Horde tales lead into the Ruins of Lordaeron through Rear Guard Patrol and A Recipe For Death.
 
 > **A vibe-coded experiment.** Lore was primarily built by describing what I wanted to an
 > AI coding assistant (Claude), then trying each step in game and giving feedback. I steered
@@ -92,10 +92,15 @@ of its chapters is added to it, even filler, so you're never sent to a quest you
 up. If another tale already tells that quest, the chapter says which tale to finish first.
 A tale is only offered to races and classes that can do every one of its chapters.
 
-The result is 110 Horde tales (50 in the open world, 29 leading into dungeons, 6 into raids
+The result is 111 Horde tales (49 in the open world, 31 leading into dungeons, 6 into raids
 and 25 class quests) and 116 Alliance tales (55, 29, 5 and 27). Each takes its name from one
 of its quests, and a few names were adjusted where the rule picked an errand instead of the
 story.
+
+Targeted Forever dungeon tales supplement the Vanilla selection: Rear Guard Patrol leads
+through Riptear to The Wrath of Rath'mael, and The New Plague concludes A Recipe For Death.
+Their prerequisite order follows live-server reporting. New chapter descriptions are editorial
+summaries sourced from Wowhead; existing chapters retain pfQuest's quest text.
 
 Explicit narrative connections supplement those rules where the database has no prerequisite
 link. Ak'Zeloth includes the Valley of Trials opening, from Kaltunk through Report to

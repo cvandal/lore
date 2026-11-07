@@ -154,6 +154,17 @@ selection so existing tale IDs remain stable. Wild Hearts adds quests 91920 and 
 between Return to Quinn and Ivar the Foul; the smoke test checks their order and progression.
 This does not switch the rest of the catalogue to Forever data.
 
+`add_forever_dungeon_tales` adds the Horde Rear Guard Patrol → Riptear → Rath'mael
+tale (`q356`) and appends The New Plague to A Recipe For Death (`q447`, preserving its
+saved-progress ID). `tools/forever_dungeon_quests.json` pins the small subset of corrected
+QuestieDB Forever quest/NPC metadata these additions need. It also records the Wowhead
+live-prerequisite report and description URLs. The new descriptions are editorial summaries,
+not verbatim quest dialogue; quest 356 retains pfQuest text. To refresh the snapshot, load
+QuestieDB's Forever flavor using the exporter's loader pattern, retain only the listed quest
+and giver/ender records, and recheck the live prerequisite links. The general catalogue still
+uses Vanilla selection; no unrelated Forever quests enter scoring. Smoke tests verify both
+chains' chapter order, progression, narrative text and map locations.
+
 The other exception is names: `NAME_OVERRIDES` replaces a name the rule got wrong,
 each with its reason, and should use one of the chain's own quest titles where possible.
 The build warns when two stories one character can see share a name, and when an override
@@ -196,8 +207,8 @@ no location and get no pin.
 
 WoW Forever redrew four maps: Mulgore, Eastern Plaguelands, Redridge Mountains and
 Stormwind City. The build converts positions on those with QuestieDB's transforms
-(`data/Forever/conversion.json`, `load_forever_maps`). That's the only Forever data the
-build uses: it moves pins and adds no content.
+(`data/Forever/conversion.json`, `load_forever_maps`). These conversions move pins; the targeted Forever chapter and dungeon additions described
+above supply the additional content.
 
 ## Client notes
 

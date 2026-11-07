@@ -1,0 +1,160 @@
+{
+  "sources": {
+    "metadata": "Questie/QuestieDB e0a6eaa, corrected Forever flavor",
+    "prerequisites": "https://www.wowhead.com/forever/news/383769",
+    "descriptions": {
+      "99156": "https://www.wowhead.com/forever/quest=99156",
+      "92422": "https://www.wowhead.com/forever/quest=92422",
+      "95216": "https://www.wowhead.com/forever/quest=95216"
+    },
+    "textPolicy": "New descriptions are editorial summaries of Wowhead quest descriptions, not verbatim Blizzard dialogue. Quest 356 uses pfQuest."
+  },
+  "quest": {
+    "356": {
+      "1": "Rear Guard Patrol",
+      "2": {
+        "1": {
+          "1": 1495
+        }
+      },
+      "3": {
+        "1": {
+          "1": 1495
+        }
+      },
+      "4": 6,
+      "5": 11,
+      "6": 8589934770,
+      "8": {
+        "1": "Kill 8 Bleeding Horrors and 8 Wandering Spirits, then report back to Linnea at her camp."
+      },
+      "17": 85
+    },
+    "99156": {
+      "1": "Rear Guard Patrol",
+      "2": {
+        "1": {
+          "1": 1495
+        }
+      },
+      "3": {
+        "1": {
+          "1": 1495
+        }
+      },
+      "4": 6,
+      "5": 13,
+      "6": 8589934770,
+      "8": {
+        "1": "Bring Riptear's Heart to Deathguard Linnea."
+      },
+      "17": 85,
+      "13": {
+        "1": 356
+      }
+    },
+    "92422": {
+      "1": "The Wrath of Rath'mael",
+      "2": {
+        "1": {
+          "1": 251001
+        }
+      },
+      "3": {
+        "1": {
+          "1": 251001
+        }
+      },
+      "4": 15,
+      "5": 22,
+      "6": 8589934770,
+      "8": {
+        "1": "Kill Rath'mael in the Ruins of Lordaeron for Deathguard Kristof in Brill."
+      },
+      "17": 16611,
+      "13": {
+        "1": 99156
+      }
+    },
+    "95216": {
+      "1": "The New Plague",
+      "2": {
+        "1": {
+          "1": 11835
+        }
+      },
+      "3": {
+        "1": {
+          "1": 11835
+        }
+      },
+      "4": 16,
+      "5": 22,
+      "6": 8589934770,
+      "8": {
+        "1": "Collect the Highly Toxic Strain from Witherfang in Ruins of Lordaeron for Theodore Griffs in Undercity."
+      },
+      "17": 16611,
+      "13": {
+        "1": 451
+      }
+    }
+  },
+  "npc": {
+    "11835": {
+      "1": "Theodore Griffs",
+      "7": {
+        "1497": {
+          "1": {
+            "1": 46.31,
+            "2": 71.91
+          }
+        }
+      },
+      "13": "AH"
+    },
+    "1495": {
+      "1": "Deathguard Linnea",
+      "7": {
+        "85": {
+          "1": {
+            "1": 65.49,
+            "2": 60.25
+          }
+        }
+      },
+      "13": "H"
+    },
+    "251001": {
+      "1": "Deathguard Kristof",
+      "13": "H",
+      "7": {
+        "85": {
+          "1": {
+            "1": 65.18,
+            "2": 60.26
+          },
+          "2": {
+            "1": 65.22,
+            "2": 60.12
+          },
+          "3": {
+            "1": 65.22,
+            "2": 60.19
+          }
+        }
+      }
+    }
+  },
+  "text": {
+    "99156": {
+      "D": "Linnea has received reports of an abomination near Venomweb Vale. Its presence suggests a breach the Bulwark should have prevented. Gather allies, destroy Riptear, and return with its heart."
+    },
+    "92422": {
+      "D": "Scouts report that a necromancer named Rath'mael is covering Lordamere Overlook with an unnatural fog that conceals the Scourge. Kristof asks you to bring allies into the ruins and eliminate him."
+    },
+    "95216": {
+      "D": "Theodore Griffs studies dangerous creatures for the Royal Apothecary Society. Witherfang, a spider in the ruins above Undercity, reportedly produces venom capable of dissolving undead flesh. Recover a sample for his experiments."
+    }
+  }
+}

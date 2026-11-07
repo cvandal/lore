@@ -257,6 +257,29 @@ do
     for _, id in ipairs(expected) do DONE[id] = saved[id] end
 end
 -- Journal entries are keyed by story ID and each quest maps to one story, so both are unique.
+do
+    for storyID, expected in pairs({
+        q356 = {356, 99156, 92422},
+        q447 = {447, 450, 451, 95216},
+    }) do
+        local story = assert(ns.storiesById[storyID])
+        assert(story.kind == "dungeon" and story.maxLevel == 22, "Forever dungeon tale classification")
+        assert(#story.quests == #expected, "Forever dungeon tale has every prerequisite")
+        local saved = {}
+        for _, id in ipairs(expected) do saved[id], DONE[id] = DONE[id], nil end
+        for i, id in ipairs(expected) do
+            local chapter = story.quests[i]
+            assert(chapter.ids[1] == id and #chapter.ids == 1 and ns.questToStory[id] == story,
+                "Forever chapters keep their order and distinct identities")
+            assert(chapter.summary and chapter.summary ~= "" and chapter.giverMap and chapter.enderMap,
+                "Forever chapters have narrative and map locations")
+            assert(ns:GetStoryProgress(story).nextIndex == i, "Forever dungeon tale advances through prerequisites")
+            DONE[id] = true
+        end
+        assert(ns:GetStoryProgress(story).done == #expected, "Dungeon finale completes the tale")
+        for _, id in ipairs(expected) do DONE[id] = saved[id] end
+    end
+end
 local seenStory, seenQuest = {}, {}
 for _, s in ipairs(ns.stories) do
     assert(not seenStory[s.id], "duplicate story ID " .. s.id)
