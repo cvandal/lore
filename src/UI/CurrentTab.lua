@@ -25,7 +25,7 @@ local function CollapsedChapter(L, quest, index, state, key)
     local muted = state == "done"
     UI.RowText(row, UI.Roman(index), { font = "title", size = 12, width = NUMERAL_W,
         color = muted and "faded" or "ink" })
-    if STATE_ICON[state] then
+    if STATE_ICON[state] and not (state == "next" and Lore:IsQuestLevelLocked(quest)) then
         UI.RowIcon(row, STATE_ICON[state], 14, ICON_X)
     end
     UI.RowText(row, quest.name, { x = NAME_X, width = L.width - NAME_X - ZONE_W - 4, wrap = false,
@@ -34,6 +34,8 @@ local function CollapsedChapter(L, quest, index, state, key)
         wrap = false, size = 11, color = "faded" })
     row:SetScript("OnClick", function() ToggleChapter(key) end)
     local lines = { quest.name }
+    local requirement = Lore:QuestLevelRequirement(quest)
+    if requirement then lines[#lines + 1] = requirement end
     if quest.giver then lines[#lines + 1] = "Given by " .. quest.giver end
     lines[#lines + 1] = "Click to read."
     UI.AddTooltip(row, lines)
@@ -61,6 +63,12 @@ local function OpenChapter(L, story, quest, index, state, key, pinned)
     end
 
     if state ~= "done" then Prerequisites(L, quest) end
+    local requirement = Lore:QuestLevelRequirement(quest)
+    if requirement then
+        local locked = state ~= "done" and state ~= "active" and Lore:IsQuestLevelLocked(quest)
+        L:Text(requirement .. (locked and " to accept this quest." or "."),
+            { indent = NUMERAL_W, size = 12, color = locked and "accent" or "faded", gap = 8 })
+    end
     -- Blizzard's text, then the practical details as their own block under a small heading.
     if quest.summary then
         L:Text(Lore:FormatQuestText(quest.summary), { indent = NUMERAL_W, size = 13, gap = 14 })

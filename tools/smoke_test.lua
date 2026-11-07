@@ -487,6 +487,38 @@ local said
 local addMessage = DEFAULT_CHAT_FRAME.AddMessage
 DEFAULT_CHAT_FRAME.AddMessage = function(self, m) said = m; addMessage(self, m) end
 local function Said(fn) said = nil; fn(); return said and said:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") end
+-- Minimum acceptance levels differ from quest difficulty levels, including mid-tale gates.
+do
+    local oldLevel = UnitLevel
+    local story = ns.storiesById.q356
+    local chapter = story.quests[3]
+    local first, second, saved = DONE[356], DONE[99156], ns.db.completedQuests[99156]
+    UnitLevel = function() return 14 end
+    DONE[356], DONE[99156] = true, nil
+    assert(chapter.level == 22 and chapter.requiredLevel == 15, "Acceptance level is distinct from difficulty")
+    assert(ns:IsQuestLevelLocked(chapter), "Rath'mael is locked at 14")
+    local message = Said(function() ns:QUEST_TURNED_IN(99156) end)
+    assert(message:find("requires level 15", 1, true), "Turn-in message explains the next chapter's level gate")
+    ns.UI.ShowStory(story)
+    local found = false
+    for _, fs in ipairs(ns.UI.textPool.used) do
+        if fs._text == "Requires level 15 to accept this quest." then found = true end
+    end
+    assert(found, "Expanded next chapter displays the level gate")
+    UnitLevel = function() return 15 end
+    assert(not ns:IsQuestLevelLocked(chapter), "Rath'mael unlocks exactly at 15")
+    assert(not ns:IsQuestLevelLocked({}), "Missing metadata does not invent a level gate")
+    for _, faction in pairs(ns.storyData) do
+        for _, tale in ipairs(faction) do
+            for _, quest in ipairs(tale.quests) do
+                assert(type(quest.requiredLevel) == "number", "Every faction's chapter has an acceptance level")
+            end
+        end
+    end
+    UnitLevel = oldLevel
+    DONE[356], DONE[99156], ns.db.completedQuests[99156] = first, second, saved
+    ns.UI.preview = nil
+end
 assert(Said(function() ns:QUEST_TURNED_IN(806) end):find("Ak'Zeloth, chapter VII of XII done. Next: Margoz, from Orgnil Soulscar.", 1, true))
 LOG, DONE[806] = { 828 }, true
 assert(Said(function() ns:QUEST_ACCEPTED(828) end):find("Ak'Zeloth, chapter VIII of XII: Margoz.", 1, true))

@@ -643,6 +643,7 @@ class Assembler:
             "ids": [int(qid)],
             "name": q.get("1"),
             "level": q.get("5") or 0,
+            "requiredLevel": max(1, q.get("4") or 0),
             "zone": zone,
             "summary": pf.get("D") or "",
             "objective": pf.get("O") or " ".join(lua_list(q.get("8"))),
@@ -854,7 +855,7 @@ def write_lua(stories, path, faction_name):
         f"Lore.storyData.{faction_name} = {{",
     ]
     story_keys = ["id", "name", "zone", "minLevel", "maxLevel", "availableLevel", "importance", "kind", "races", "classes"]
-    quest_keys = ["ids", "name", "level", "zone", "giver", "giverMap", "giverX", "giverY", "giverInside",
+    quest_keys = ["ids", "name", "level", "requiredLevel", "zone", "giver", "giverMap", "giverX", "giverY", "giverInside",
                   "ender", "enderMap", "enderX", "enderY", "enderInside", "after", "objective", "summary", "variants"]
     for s in stories:
         lines.append("    {")

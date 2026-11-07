@@ -164,6 +164,8 @@ QuestieDB's Forever flavor using the exporter's loader pattern, retain only the 
 and giver/ender records, and recheck the live prerequisite links. The general catalogue still
 uses Vanilla selection; no unrelated Forever quests enter scoring. Smoke tests verify both
 chains' chapter order, progression, narrative text and map locations.
+Chapter-level requirement tests cover the Rath'mael gate at levels 14 and 15, the
+rendered warning and turn-in message, and metadata coverage for both factions.
 
 The other exception is names: `NAME_OVERRIDES` replaces a name the rule got wrong,
 each with its reason, and should use one of the chain's own quest titles where possible.
@@ -191,7 +193,9 @@ Each story has:
   chapter must be doable. Empty means anyone.
 - `quests`, each with:
   - `ids`: race or class versions of the same chapter; doing any one completes it.
-  - `name`, `level` and `zone`.
+  - `name`, `level` (quest difficulty), `requiredLevel` (minimum acceptance level,
+    at least 1) and `zone`. Chapter details and tooltips display the acceptance level;
+    turn-in messages explain level-gated next chapters.
   - `giver` / `ender` with a UI map ID and x/y (0-100). `giverInside` / `enderInside` name
     the dungeon when the NPC is inside one; the coordinates are then its entrance.
   - `after`: quest IDs from other tales this chapter needs first (the book names them).

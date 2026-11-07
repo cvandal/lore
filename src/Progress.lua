@@ -224,6 +224,16 @@ function Lore:PlayerLevel()
     return UnitLevel("player")
 end
 
+function Lore:QuestLevelRequirement(quest)
+    if quest.requiredLevel then
+        return ("Requires level %d"):format(quest.requiredLevel)
+    end
+end
+
+function Lore:IsQuestLevelLocked(quest)
+    return quest.requiredLevel and self:PlayerLevel() < quest.requiredLevel or false
+end
+
 -- "levels 17-18", plus when the first chapter can be picked up earlier than that.
 function Lore:LevelText(story)
     local text = ("levels %d-%d"):format(story.minLevel, story.maxLevel)
@@ -331,6 +341,9 @@ function Lore:OnQuestTurnedIn(questID)
         if progress.states[i] ~= "done" then
             local quest = story.quests[i]
             local from = quest.giver and (", from " .. quest.giver) or ""
+            if self:IsQuestLevelLocked(quest) then
+                from = (" — requires level %d"):format(quest.requiredLevel)
+            end
             self:Say(("%s done. Next: %s%s."):format(ChapterOf(story, index), quest.name, from))
             return
         end
