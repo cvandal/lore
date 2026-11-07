@@ -1,7 +1,7 @@
 local _, Lore = ...
 local UI, Theme = Lore.UI, Lore.Theme
 
-local ICON_W = 18
+local ICON_W = 36
 local LEVEL_W = 44
 local IMPORTANCE = { "Minor tale", "Notable tale", "Major tale" }
 local KIND = { dungeon = "Leads into a dungeon", raid = "Leads into a raid", class = "Class quest" }
@@ -20,15 +20,18 @@ local function SortedStoriesFor(act)
     return list
 end
 
-local function StoryRow(L, story)
+local function StoryRow(L, story, current)
     local done = Lore:IsStoryComplete(story)
     local fits = not done and Lore:FitsPlayer(story)
     local row = L:Row(20, 1)
 
     if done then
         UI.RowIcon(row, Theme.textures.check, 14, 0)
-    elseif story.importance == 3 then
-        UI.RowIcon(row, Theme.textures.major, 12, 1)
+    elseif current then
+        UI.RowIcon(row, Theme.textures.activeQuest, 14, 0)
+    end
+    if not done and story.importance == 3 then
+        UI.RowIcon(row, Theme.textures.major, 12, 19)
     end
 
     local name = UI.RowText(row, story.name, { x = ICON_W, width = L.width - ICON_W - LEVEL_W - 8, wrap = false,
@@ -52,6 +55,8 @@ local function StoryRow(L, story)
     end
     if done then
         lines[#lines + 1] = "Recorded in your journal."
+    elseif current then
+        lines[#lines + 1] = "Tale underway. See Current Tales to follow it."
     elseif fits then
         lines[#lines + 1] = "Fits your level."
     end
@@ -160,19 +165,24 @@ UI.RegisterTab({
             { size = 11, color = "faded", justify = "CENTER", gap = 8 })
         L:Divider()
 
+        local underway = {}
+        for _, item in ipairs(Lore:GetCurrentStories()) do
+            underway[item.story.id] = true
+        end
+
         for _, act in ipairs(Lore.acts) do
             local stories = SortedStoriesFor(act)
             if #stories > 0 then
                 L:Text(act.name, { font = "title", size = 19, color = "accent", gap = 4 })
                 L:Divider(6)
                 for _, story in ipairs(stories) do
-                    StoryRow(L, story)
+                    StoryRow(L, story, underway[story.id])
                 end
                 L:Space(10)
             end
         end
 
-        L:Text(Theme.accentName .. " tales fit your level. Diamonds mark major tales. Click a tale to read it.",
+        L:Text(Theme.accentName .. " tales fit your level. Quest-log icons mark tales underway; checks mark completed tales. Diamonds mark major tales. Click a tale to read it.",
             { size = 11, color = "faded", justify = "CENTER" })
     end,
 })

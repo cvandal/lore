@@ -111,6 +111,8 @@ orc warrior with "Report to Orgnil" in the log), renders every tab and checks th
 behaviour: quest text formatting, journal detection, map pins, the minimap button, the
 Settings tab, story messages, story pages, quest badges and the quest log tooltip. It
 catches Lua errors and logic bugs, not layout problems, so check changes in game too.
+The Chronicle uses the same current-tale detection as Current Tales, including between
+chapters, and keeps major-tale diamonds alongside underway icons.
 Regression checks cover the active tale count, switching tales, per-character selection across reopening and addon reloads, selection fallback, suppression of future chapter
 pins while tales are active, clearing manual map selections on acceptance or completion,
 and persisted chapter turn-ins across addon reloads.

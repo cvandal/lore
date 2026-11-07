@@ -28,7 +28,8 @@ brown leather for the Horde, blue on navy for the Alliance.
   chapter is listed in order, with Blizzard's quest text, the objective, who gives it and a
   button to show it on the map.
 - **Chronicle** lists every tale your race and class can do, grouped into three acts by
-  level. Tales that fit your level are highlighted. Click one to read it and see where it
+  level. Tales that fit your level are highlighted; quest-log icons mark tales underway,
+  checks mark completed tales, and diamonds mark major tales. Click one to read it and see where it
   starts.
 - **Journal** keeps the tales you've finished, with the date, your level and where you were.
   Individual chapters such as Report to Orgnil count toward their tale; they do not create
