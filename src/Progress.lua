@@ -184,7 +184,7 @@ function Lore:IsStoryComplete(story)
     return IsChapterDone(story.quests[#story.quests])
 end
 
--- Keep started tales current between quests, ordered by importance and progress.
+-- Keep started tales current between quests, ordered by level, then importance and progress.
 function Lore:GetCurrentStories()
     local inLog = GetQuestLogIDs()
     local list = {}
@@ -197,6 +197,12 @@ function Lore:GetCurrentStories()
         end
     end
     table.sort(list, function(a, b)
+        if a.story.minLevel ~= b.story.minLevel then
+            return a.story.minLevel < b.story.minLevel
+        end
+        if a.story.maxLevel ~= b.story.maxLevel then
+            return a.story.maxLevel < b.story.maxLevel
+        end
         if a.story.importance ~= b.story.importance then
             return a.story.importance > b.story.importance
         end
