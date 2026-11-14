@@ -1,12 +1,13 @@
 local ADDON_NAME, Lore = ...
 _G.Lore = Lore
 
-Lore.version = "0.8.1"
+Lore.version = "0.9.0"
 Lore.storyData = {}  -- [faction] = stories, filled by Data/<Faction>Stories.lua
 
 local defaults = {
     completedQuests = {}, -- observed story quest turn-ins, retained across reloads
     journal = {},   -- [storyId] = { completedAt, level, zone } or { preLore = true }
+    collapsedActs = {}, -- [act.minLevel] = true for acts folded up in the Chronicle
     settings = {
         point = nil,
         pins = true,    -- map pins for the current tale and suggestions

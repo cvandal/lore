@@ -173,10 +173,20 @@ UI.RegisterTab({
         for _, act in ipairs(Lore.acts) do
             local stories = SortedStoriesFor(act)
             if #stories > 0 then
-                L:Text(act.name, { font = "title", size = 19, color = "accent", gap = 4 })
+                local collapsed = Lore.db.collapsedActs[act.minLevel]
+                local header = L:Row(26, 4)
+                UI.RowIcon(header, collapsed and Theme.textures.expand or Theme.textures.collapse, 16, 0)
+                UI.RowText(header, act.name, { x = 22, font = "title", size = 19, color = "accent", wrap = false })
+                header:SetScript("OnClick", function()
+                    Lore.db.collapsedActs[act.minLevel] = not collapsed or nil
+                    UI.Refresh()
+                end)
+                UI.AddTooltip(header, { act.name, #stories .. " tales", collapsed and "Click to expand." or "Click to collapse." })
                 L:Divider(6)
-                for _, story in ipairs(stories) do
-                    StoryRow(L, story, underway[story.id])
+                if not collapsed then
+                    for _, story in ipairs(stories) do
+                        StoryRow(L, story, underway[story.id])
+                    end
                 end
                 L:Space(10)
             end
